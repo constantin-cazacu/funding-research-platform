@@ -9,9 +9,40 @@ const ResearcherRegisterForm = () => {
     const [orcid, setOrcid] = useState("");
     const [position, setPosition] = useState("");
 
+    async function postData(url = '', data = {}) {
+        const response = await fetch(url, {
+            method: 'POST', // or 'PUT'
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        });
+        return response.json(); // parses JSON response into native JavaScript objects
+    }
+
     const handleSubmit = (e) => {
         e.preventDefault();
         // Do something with the form data
+        const formData = {
+            name: name,
+            surname: surname,
+            email: email,
+            password: password,
+            orcid: orcid,
+            position: position
+        };
+
+        const jsonFormData = JSON.stringify(formData);
+
+        // send the jsonFormData to the API using the fetch() method
+        const url = 'http://localhost:5000/researcher/register';
+        postData(url, jsonFormData)
+            .then(jsonFormData => {
+                console.log(jsonFormData); // JSON data from response
+            })
+            .catch(error => {
+                console.error(error);
+            });
     };
 
     const isNameValid = name !== "";
