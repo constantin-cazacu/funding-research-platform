@@ -14,8 +14,8 @@ api = Api(app)
 CORS(app)
 
 # Create the database tables
-with app.app_context():
-    db.create_all()
+# with app.app_context():
+#     db.create_all()
 
 
 # Create the API resources
@@ -37,7 +37,8 @@ class ResearcherRegister(Resource):
         print(type(data))
 
         if User.query.filter_by(email=data['email']).first():
-            return make_response('User with this email already exists', 409)
+
+            return {'message': 'User with this email already exists'}, 409
 
         name = data['name']
         surname = data['surname']
@@ -67,7 +68,7 @@ class ResearcherRegister(Resource):
         db.session.add(researcher)
         db.session.commit()
 
-        return make_response('Success! {} registered as a researcher'.format(email), 201)
+        return {'message': 'Success! {} registered as a researcher'.format(email)}, 201
 
 
 class BusinessRegister(Resource):

@@ -1,13 +1,16 @@
 import { useState } from "react";
+import { useRouter } from "next/router";
 import { Box, TextField, Button, MenuItem } from "@mui/material";
 
-const ResearcherRegisterForm = () => {
+function ResearcherRegisterForm() {
     const [name, setName] = useState("");
     const [surname, setSurname] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [orcid, setOrcid] = useState("");
     const [position, setPosition] = useState("");
+
+    const router = useRouter();
 
     async function postData(url = '', data = {}) {
         const response = await fetch(url, {
@@ -40,6 +43,7 @@ const ResearcherRegisterForm = () => {
         postData(url, jsonFormData)
             .then(jsonFormData => {
                 console.log(jsonFormData); // JSON data from response
+                router.push('/submit');
             })
             .catch(error => {
                 console.error(error);
