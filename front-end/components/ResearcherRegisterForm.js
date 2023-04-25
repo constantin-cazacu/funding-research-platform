@@ -15,8 +15,9 @@ const ResearcherRegisterForm = () => {
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify(data)
+            body: data
         });
+        console.log(response)
         return response.json(); // parses JSON response into native JavaScript objects
     }
 
