@@ -1,4 +1,5 @@
 import React from "react";
+import Link from "next/link"
 import { Box, Button } from "@mui/material";
 
 const RegisterButtons = () => {
@@ -10,16 +11,17 @@ const RegisterButtons = () => {
                 justifyContent: "center",
                 alignItems: "center",
                 height: "100vh",
+                gap: "1em"
             }}
         >
             <Button variant="contained" color="primary">
-                Researcher
+                <Link href='/researcher/register'>
+                        Researcher
+                </Link>
             </Button>
-            <Box sx={{ my: 2 }}>
-                <Button variant="contained" color="secondary">
-                    Business
-                </Button>
-            </Box>
+            <Button variant="contained" color="secondary">
+                Business
+            </Button>
             <Button variant="contained" color="warning">
                 Supporter
             </Button>

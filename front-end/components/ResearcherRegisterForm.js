@@ -1,7 +1,8 @@
 import { useState } from "react";
+import { useRouter } from "next/router";
 import { Box, TextField, Button, MenuItem } from "@mui/material";
 
-const ResearcherRegisterForm = () => {
+function ResearcherRegisterForm() {
     const [name, setName] = useState("");
     const [surname, setSurname] = useState("");
     const [email, setEmail] = useState("");
@@ -9,14 +10,17 @@ const ResearcherRegisterForm = () => {
     const [orcid, setOrcid] = useState("");
     const [position, setPosition] = useState("");
 
+    const router = useRouter();
+
     async function postData(url = '', data = {}) {
         const response = await fetch(url, {
             method: 'POST', // or 'PUT'
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify(data)
+            body: data
         });
+        console.log(response)
         return response.json(); // parses JSON response into native JavaScript objects
     }
 
@@ -39,6 +43,7 @@ const ResearcherRegisterForm = () => {
         postData(url, jsonFormData)
             .then(jsonFormData => {
                 console.log(jsonFormData); // JSON data from response
+                router.push('/submit');
             })
             .catch(error => {
                 console.error(error);

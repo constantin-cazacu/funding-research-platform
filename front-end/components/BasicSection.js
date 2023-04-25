@@ -21,12 +21,15 @@ const fieldOfStudies = [
 
 const BasicSection = () => {
     const [projectTitle, setProjectTitle] = React.useState('');
-    const [fieldOfStudy, setFieldOfStudy] = React.useState([]);
+    const [selectedFields, setSelectedFields] = React.useState([]);
     const [abstract, setAbstract] = React.useState('');
 
-    const handleFieldOfStudyChange = (event) => {
-        const selectedFields = event.target.value;
-        setFieldOfStudy(selectedFields.slice(0, 2));
+    const handleFieldSelection = (field) => {
+        if (selectedFields.includes(field)) {
+            setSelectedFields(selectedFields.filter((f) => f !== field));
+        } else if (selectedFields.length < 2) {
+            setSelectedFields([...selectedFields, field]);
+        }
     };
 
     const handleAbstractChange = (event) => {
@@ -54,9 +57,8 @@ const BasicSection = () => {
                             key={field}
                             control={
                                 <Checkbox
-                                    checked={fieldOfStudy.includes(field)}
-                                    onChange={handleFieldOfStudyChange}
-                                    value={field}
+                                    checked={selectedFields.includes(field)}
+                                    onChange={() => handleFieldSelection(field)}
                                 />
                             }
                             label={field}
