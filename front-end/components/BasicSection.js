@@ -19,22 +19,39 @@ const fieldOfStudies = [
     'Art',
 ];
 
-const BasicSection = () => {
+const BasicSection = ({ handleInputChange, setFormData}) => {
     const [projectTitle, setProjectTitle] = React.useState('');
     const [selectedFields, setSelectedFields] = React.useState([]);
     const [abstract, setAbstract] = React.useState('');
 
-    const handleFieldSelection = (field) => {
-        if (selectedFields.includes(field)) {
-            setSelectedFields(selectedFields.filter((f) => f !== field));
-        } else if (selectedFields.length < 2) {
-            setSelectedFields([...selectedFields, field]);
+    const handleFieldSelectionChange = (event) => {
+        const { checked, name } = event.target ?? {};
+        if (!name) return;
+
+        let updatedFields = [];
+        if (checked) {
+            if (selectedFields.length >= 2) {
+                // If we're trying to add a third field, don't do anything
+                return;
+            }
+            updatedFields = [...selectedFields, name];
+        } else {
+            updatedFields = selectedFields.filter((field) => field !== name);
         }
+
+        setSelectedFields(updatedFields);
+
+        // Update the form data with the new selected fields
+        setFormData((prevFormData) => ({
+            ...prevFormData,
+            selectedFields: updatedFields,
+        }));
     };
 
-    const handleAbstractChange = (event) => {
-        setAbstract(event.target.value);
-    };
+    React.useEffect(() => {
+        // console.log("Selected Fields:", selectedFields);
+        handleInputChange({ projectTitle, selectedFields, abstract });
+    }, [projectTitle, selectedFields, abstract, handleInputChange])
 
     return (
         <Box sx={{ maxWidth: 600, mx: 'auto' }}>
@@ -45,11 +62,15 @@ const BasicSection = () => {
                 <TextField
                     label="Project Title"
                     value={projectTitle}
-                    onChange={(event) => setProjectTitle(event.target.value)}
+                    onChange={(event) => {
+                        setProjectTitle(event.target.value);
+                        handleInputChange(event);
+                    }}
                     variant="outlined"
                     multiline
                     maxRows={4}
                     inputProps={{ maxLength: 600 }}
+                    name="projectTitle"
                 />
                 <Box sx={{ display: 'flex', flexDirection: 'row', flexWrap: 'wrap', gap: 2 }}>
                     {fieldOfStudies.map((field) => (
@@ -58,7 +79,8 @@ const BasicSection = () => {
                             control={
                                 <Checkbox
                                     checked={selectedFields.includes(field)}
-                                    onChange={() => handleFieldSelection(field)}
+                                    onChange={(event) => handleFieldSelectionChange(event)}
+                                    name={field}
                                 />
                             }
                             label={field}
@@ -68,11 +90,15 @@ const BasicSection = () => {
                 <TextField
                     label="Abstract"
                     value={abstract}
-                    onChange={handleAbstractChange}
+                    onChange={(event) => {
+                        setAbstract(event.target.value);
+                        handleInputChange(event);
+                    }}
                     variant="outlined"
                     multiline
                     maxRows={10}
                     inputProps={{ maxLength: 2000 }}
+                    name="abstract"
                 />
             </Box>
         </Box>
