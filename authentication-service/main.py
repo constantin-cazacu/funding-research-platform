@@ -20,14 +20,14 @@ CORS(app)
 
 # Create the API resources
 # Define a route to handle the OPTIONS request
-# @app.route('/', methods=['OPTIONS'])
-# def handle_options():
-#     headers = {
-#         'Access-Control-Allow-Origin': '*',
-#         'Access-Control-Allow-Methods': 'PUT,GET,POST,DELETE,OPTIONS',
-#         'Access-Control-Allow-Headers': 'Content-Type, Authorization'
-#     }
-#     return jsonify({'status': 'ok'}), 200, headers
+@app.route('/', methods=['OPTIONS'])
+def handle_options():
+    headers = {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'PUT,GET,POST,DELETE,OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type, Authorization'
+    }
+    return {'status': 'ok'}, 200, headers
 
 
 class ResearcherRegister(Resource):
@@ -168,4 +168,4 @@ api.add_resource(Login, "/login")
 api.add_resource(Logout, "/logout")
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, port=5001)
