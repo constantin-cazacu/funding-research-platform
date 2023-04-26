@@ -5,7 +5,8 @@ from models import db, ResearcherProject
 
 app = Flask(__name__)
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:admin@localhost/psdb'
+# app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:admin@localhost/psdb'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:0707@localhost/fpDB'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db.init_app(app)
 api = Api(app)

@@ -25,6 +25,22 @@ function Submit() {
         } else {
             console.log('Budget is not empty');
         }
+        fetch('http://localhost:5000/researcher/submit_project', {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(formData)
+        })
+            .then(response => {
+                console.log(response);
+                // Handle response from the API
+            })
+            .catch(error => {
+                console.error(error);
+                // Handle error
+            });
+
         setFormData((prevFormData) => ({
             ...prevFormData,
             ...formData,
@@ -102,7 +118,6 @@ function Submit() {
                 </BudgetSection>
                 <TimelineSection handleInputChange={handleInputChange}
                                  onTimelineItemsChange={handleTimelineItemsChange}>
-
                 </TimelineSection>
                 <Box sx={{
                     display: "flex",
