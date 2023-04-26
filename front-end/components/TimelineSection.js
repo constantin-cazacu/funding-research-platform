@@ -1,11 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Box, Button, Typography, TextField } from "@mui/material";
 import { Timeline, TimelineItem, TimelineSeparator, TimelineConnector, TimelineContent, TimelineDot } from "@mui/lab";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import  { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 
-const TimelineSection = () => {
+const TimelineSection = ({ onTimelineItemsChange }) => {
     const [timelineItems, setTimelineItems] = useState([]);
 
     const handleAddItem = () => {
@@ -27,6 +27,10 @@ const TimelineSection = () => {
         newItems[index].date = date;
         setTimelineItems(newItems);
     };
+
+    useEffect(() => {
+        onTimelineItemsChange(timelineItems);
+    }, [timelineItems]);
 
     return (
         <Box display="flex" alignItems="center" justifyContent="center">

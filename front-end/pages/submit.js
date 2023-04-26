@@ -9,8 +9,8 @@ function Submit() {
         projectTitle: '',
         selectedFields: [],
         abstract: '',
-        budget: {},
-        timeline: []
+        budgetItems: {},
+        timelineItems: []
     });
 
     const [selectedFields, setSelectedFields] = useState([]);
@@ -19,6 +19,12 @@ function Submit() {
         event.preventDefault();
         // Send the form data to the backend
         console.log('Project data submitted:', formData); // just for testing purposes
+        // Check if budget is empty
+        if (Object.keys(formData.budgetItems).length === 0) {
+            console.log('Budget is empty');
+        } else {
+            console.log('Budget is not empty');
+        }
         setFormData((prevFormData) => ({
             ...prevFormData,
             ...formData,
@@ -44,6 +50,14 @@ function Submit() {
                 ...formData,
                 [name]: value,
             }));
+        } else if (name === "budgetItems") {
+            const updatedBudgetItems = { ...formData.budgetItems };
+            updatedBudgetItems[target.id][target.name] = value;
+            setFormData((formData) => ({
+                ...formData,
+                budgetItems: updatedBudgetItems,
+            }));
+            handleBudgetChange(updatedBudgetItems);
         } else {
             setFormData((formData) => ({
                 ...formData,
@@ -59,6 +73,20 @@ function Submit() {
         }));
     };
 
+    const handleBudgetChange = (newBudgetItems) => {
+        setFormData((formData) => ({
+            ...formData,
+            budgetItems: newBudgetItems,
+        }));
+    };
+
+    const handleTimelineItemsChange = (timelineItems) => {
+        setFormData((formData) => ({
+            ...formData,
+            timelineItems: timelineItems
+        }));
+    }
+
     return (
         <>
             <form onSubmit={handleSubmit}>
@@ -67,8 +95,15 @@ function Submit() {
                     handleFieldSelectionChange={handleFieldSelectionChange}
                     setFormData={setFormData}>
                 </BasicSection>
-                <BudgetSection handleInputChange={handleInputChange}></BudgetSection>
-                <TimelineSection handleInputChange={handleInputChange}></TimelineSection>
+                <BudgetSection handleInputChange={handleInputChange}
+                               handleBudgetChange={handleBudgetChange}
+                               formData={formData}
+                               setFormData={setFormData}>
+                </BudgetSection>
+                <TimelineSection handleInputChange={handleInputChange}
+                                 onTimelineItemsChange={handleTimelineItemsChange}>
+
+                </TimelineSection>
                 <Box sx={{
                     display: "flex",
                     flexDirection: "column",
