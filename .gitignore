@@ -14,7 +14,7 @@ __pycache__/
 
 # Distribution / packaging
 .Python
-#env/
+env/
 build/
 develop-eggs/
 dist/
@@ -85,8 +85,8 @@ celerybeat-schedule
 .env
 
 # virtualenv
-#venv/
-#ENV/
+venv/
+ENV/
 
 # Spyder project settings
 .spyderproject
@@ -186,4 +186,4 @@ fabric.properties
 .idea/caches/build_file_checksums.ser
 
 # idea folder, uncomment if you don't need it
-# .idea
+ .idea

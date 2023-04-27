@@ -2,13 +2,17 @@ from flask import Flask, request, make_response
 from flask_restful import Api, Resource
 from flask_cors import CORS
 from werkzeug.security import generate_password_hash, check_password_hash
-from models import db, User, Researcher, JuridicalPerson, UserRole
+from models import db, User, Researcher, JuridicalPerson
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
 
 app = Flask(__name__)
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:0707@localhost/fpDB'
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URI')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['SECRET_KEY'] = 'your-secret-key-here'
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY')
 db.init_app(app)
 api = Api(app)
 CORS(app)
