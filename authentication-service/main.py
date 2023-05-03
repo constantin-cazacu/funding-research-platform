@@ -1,12 +1,15 @@
 from flask import Flask, request, make_response
 from flask_restful import Api, Resource
 from flask_cors import CORS
-from flask_jwt_extended import JWTManager, jwt_required, get_jwt_identity, create_access_token, jwt_manager, get_jwt
+from flask_migrate import Migrate
+from flask_jwt_extended import JWTManager, jwt_required, get_jwt_identity, create_access_token, create_refresh_token, jwt_manager, get_jwt, verify_jwt_in_request, get_jti
 from werkzeug.security import generate_password_hash, check_password_hash
-from models import db, User, Researcher, JuridicalPerson
+from models import db, User, Researcher, JuridicalPerson, TokenBlacklist
 from dotenv import load_dotenv
 from casbin import Enforcer
 import os
+from datetime import datetime, timedelta
+from functools import wraps
 
 load_dotenv()
 
@@ -16,10 +19,16 @@ app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URI')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY')
 app.config['JWT_SECRET_KEY'] = os.environ.get('JWT_SECRET_KEY')
+app.config['JWT_BLACKLIST_ENABLED'] = True
+app.config['JWT_BLACKLIST_TOKEN_CHECKS'] = ['access', 'refresh']
+app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(hours=1)
+app.config['JWT_REFRESH_TOKEN_EXPIRES'] = timedelta(days=30)
+app.config['JWT_BLACKLIST_TOKEN_CLASS'] = 'app.models.TokenBlacklist'
 db.init_app(app)
 api = Api(app)
 jwt = JWTManager(app)
 CORS(app)
+migrate = Migrate(app, db)
 
 # Initialize casbin enforcer with model and policy files
 e = Enforcer('model.conf', 'policy.csv')
@@ -32,12 +41,20 @@ role_permissions = {
     'admin': ['view_project', 'evaluate_project']
 }
 
-# TODO add a storage structure for revoked tokens
-blacklist = set()
-
 # Create the database tables
 # with app.app_context():
 #     db.create_all()
+
+
+def jwt_required(fn):
+    @wraps(fn)
+    def wrapper(*args, **kwargs):
+        verify_jwt_in_request()
+        jti = get_jwt()['jti']
+        if TokenBlacklist.is_token_revoked(jti, 'access'):
+            return make_response({"message": "Token has been revoked"}, 401)
+        return fn(*args, **kwargs)
+    return wrapper
 
 
 # Create the API resources
@@ -168,19 +185,38 @@ class Login(Resource):
         if not user or not check_password_hash(user.password, data['password']):
             return make_response({'message': 'Invalid credentials'}, 401)
 
-        access_token = create_access_token(identity=data['email'], additional_claims={'role': user.role})
+        access_token = create_access_token(identity=data['email'],
+                                           expires_delta=app.config['JWT_ACCESS_TOKEN_EXPIRES'],
+                                           additional_claims={'role': user.role})
+
+        refresh_token = create_refresh_token(identity=data['email'],
+                                             expires_delta=app.config['JWT_REFRESH_TOKEN_EXPIRES'],
+                                             additional_claims={'role': user.role})
+
+        # update user's refresh token value in the database
+        user.refresh_token = refresh_token
+        db.session.commit()
 
         return make_response({'message': 'Login successful',
-                              'access_token': access_token}, 200)
+                              'access_token': access_token,
+                              'refresh_token': refresh_token}, 200)
 
 
 class Logout(Resource):
-    @jwt_required()
+    @jwt_required
     def post(self):
+        # Get the user's email from the access token
+        current_user = get_jwt_identity()
+        # Query the database for the user
+        user = User.query.filter_by(email=current_user).first()
         # Get the JWT ID (jti) from the access token
         jti = get_jwt()['jti']
+        # Get the refresh token jti from the raw JWT
+        refresh_token = user.refresh_token
+        refresh_jti = get_jti(refresh_token)
         # Add the jti to the blacklist
-        blacklist.add(jti)
+        TokenBlacklist.add_revoked_token(jti, token_type='access')
+        TokenBlacklist.add_revoked_token(refresh_jti, token_type='refresh')
 
         return {'message': 'User logged out successfully'}, 200
 
