@@ -1,9 +1,11 @@
 from flask import Flask, request, make_response
 from flask_restful import Api, Resource
 from flask_cors import CORS
+from flask_jwt_extended import JWTManager, jwt_required, get_jwt_identity, create_access_token, jwt_manager, get_jwt
 from werkzeug.security import generate_password_hash, check_password_hash
 from models import db, User, Researcher, JuridicalPerson
 from dotenv import load_dotenv
+from casbin import Enforcer
 import os
 
 load_dotenv()
@@ -13,9 +15,25 @@ app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URI')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY')
+app.config['JWT_SECRET_KEY'] = os.environ.get('JWT_SECRET_KEY')
 db.init_app(app)
 api = Api(app)
+jwt = JWTManager(app)
 CORS(app)
+
+# Initialize casbin enforcer with model and policy files
+e = Enforcer('model.conf', 'policy.csv')
+
+# Define roles and their corresponding permissions
+role_permissions = {
+    'supporter': ['view_project', 'fund_project'],
+    'researcher': ['view_project', 'create_project', 'fund_project'],
+    'business': ['view_project', 'create_project', 'fund_project'],
+    'admin': ['view_project', 'evaluate_project']
+}
+
+# TODO add a storage structure for revoked tokens
+blacklist = set()
 
 # Create the database tables
 # with app.app_context():
@@ -42,7 +60,7 @@ class ResearcherRegister(Resource):
 
         if User.query.filter_by(email=data['email']).first():
 
-            return {'message': 'User with this email already exists'}, 409
+            return make_response({'message': 'User with this email already exists'}, 409)
 
         name = data['name']
         surname = data['surname']
@@ -72,7 +90,7 @@ class ResearcherRegister(Resource):
         db.session.add(researcher)
         db.session.commit()
 
-        return {'message': 'Success! {} registered as a researcher'.format(email)}, 201
+        return make_response({'message': 'Success! {} registered as a researcher'.format(email)}, 201)
 
 
 class BusinessRegister(Resource):
@@ -80,7 +98,7 @@ class BusinessRegister(Resource):
         data = request.get_json()
 
         if User.query.filter_by(email=data['email']).first():
-            return make_response('User with this email already exists', 409)
+            return make_response({'message': 'User with this email already exists'}, 409)
 
         name = data['name']
         surname = data['surname']
@@ -108,7 +126,7 @@ class BusinessRegister(Resource):
         db.session.add(juridical_person)
         db.session.commit()
 
-        return make_response('Success! {} registered as a juridical person'.format(email), 201)
+        return make_response({'message': 'Success! {} registered as a juridical person'.format(email)}, 201)
 
 
 class SupporterRegister(Resource):
@@ -116,7 +134,7 @@ class SupporterRegister(Resource):
         data = request.get_json()
 
         if User.query.filter_by(email=data['email']).first():
-            return make_response('User with this email already exists', 409)
+            return make_response({'message': 'User with this email already exists'}, 409)
 
         # For supporters, just create a new user and assign the 'supporter' role
         name = data['name']
@@ -136,7 +154,7 @@ class SupporterRegister(Resource):
         db.session.add(user)
         db.session.commit()
 
-        return make_response('Success! {} registered as a supporter'.format(email), 201)
+        return make_response({'message': 'Success! {} registered as a supporter'.format(email)}, 201)
 
 
 class Login(Resource):
@@ -148,19 +166,21 @@ class Login(Resource):
 
         # If the user doesn't exist or the password is incorrect, return an error
         if not user or not check_password_hash(user.password, data['password']):
-            return make_response('Invalid credentials', 401)
+            return make_response({'message': 'Invalid credentials'}, 401)
 
-        # # Generate an access token using the user's ID and role
-        # access_token = create_access_token(identity={'id': user.id, 'role': user.role.value})
-        #
-        # # Return the access token as a response
-        # return jsonify(access_token=access_token)
+        access_token = create_access_token(identity=data['email'], additional_claims={'role': user.role})
 
-        return make_response('Login successful')
+        return make_response({'message': 'Login successful',
+                              'access_token': access_token}, 200)
 
 
 class Logout(Resource):
+    @jwt_required()
     def post(self):
+        # Get the JWT ID (jti) from the access token
+        jti = get_jwt()['jti']
+        # Add the jti to the blacklist
+        blacklist.add(jti)
 
         return {'message': 'User logged out successfully'}, 200
 
