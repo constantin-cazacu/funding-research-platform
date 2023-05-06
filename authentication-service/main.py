@@ -10,6 +10,9 @@ from casbin import Enforcer
 import os
 from datetime import datetime, timedelta
 from functools import wraps
+from prometheus_client import Counter, start_http_server, make_wsgi_app
+from werkzeug.middleware.dispatcher import DispatcherMiddleware
+
 
 load_dotenv()
 
@@ -45,6 +48,13 @@ role_permissions = {
 # with app.app_context():
 #     db.create_all()
 
+# Define a Prometheus counter to track the number of new users
+new_user_counter = Counter('new_users', 'Number of new users per week', ['week'])
+
+# Add prometheus wsgi middleware to route /metrics requests
+app.wsgi_app = DispatcherMiddleware(app.wsgi_app, {
+    '/metrics': make_wsgi_app()
+})
 
 def jwt_required(fn):
     @wraps(fn)
@@ -67,6 +77,12 @@ def handle_options():
         'Access-Control-Allow-Headers': 'Content-Type, Authorization'
     }
     return {'status': 'ok'}, 200, headers
+
+
+def increase_user_counter():
+    # Increment the new user counter with the current week number as a label
+    current_week = datetime.now().isocalendar()[1]
+    new_user_counter.labels(week=current_week).inc()
 
 
 class ResearcherRegister(Resource):
@@ -107,6 +123,8 @@ class ResearcherRegister(Resource):
         db.session.add(researcher)
         db.session.commit()
 
+        increase_user_counter()
+
         return make_response({'message': 'Success! {} registered as a researcher'.format(email)}, 201)
 
 
@@ -143,6 +161,8 @@ class BusinessRegister(Resource):
         db.session.add(juridical_person)
         db.session.commit()
 
+        increase_user_counter()
+
         return make_response({'message': 'Success! {} registered as a juridical person'.format(email)}, 201)
 
 
@@ -170,6 +190,8 @@ class SupporterRegister(Resource):
         # Add the user to the database
         db.session.add(user)
         db.session.commit()
+
+        increase_user_counter()
 
         return make_response({'message': 'Success! {} registered as a supporter'.format(email)}, 201)
 
@@ -228,4 +250,7 @@ api.add_resource(Login, "/login")
 api.add_resource(Logout, "/logout")
 
 if __name__ == '__main__':
+    # Start the Prometheus HTTP server on port 8000
+    # start_http_server(8000)
+
     app.run(debug=True, port=5001)
