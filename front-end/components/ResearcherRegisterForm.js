@@ -39,7 +39,7 @@ function ResearcherRegisterForm() {
         const jsonFormData = JSON.stringify(formData);
 
         // send the jsonFormData to the API using the fetch() method
-        const url = 'http://localhost:5000/researcher/register';
+        const url = 'http://localhost:5001/researcher/register';
         postData(url, jsonFormData)
             .then(jsonFormData => {
                 console.log(jsonFormData); // JSON data from response

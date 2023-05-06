@@ -2,24 +2,32 @@ import React, { useState } from "react";
 import { Box, Button, Typography, TextField } from "@mui/material";
 import { VictoryPie } from "victory";
 
-const BudgetSection = () => {
-    const [budgetItems, setBudgetItems] = useState([{ name: "", sum: "" }]);
+const BudgetSection = ({ handleInputChange, formData, handleBudgetChange  }) => {
+    const [budgetItems, setBudgetItems] = useState([{ id: 0, name: "", sum: "" }]);
 
     const handleAddItem = () => {
-        setBudgetItems([...budgetItems, { name: "", sum: "" }]);
+        const newId = budgetItems[budgetItems.length - 1].id + 1;
+        const newBudgetItems = [...budgetItems, { id: newId, name: "", sum: "" }];
+        setBudgetItems(newBudgetItems);
+        handleBudgetChange(newBudgetItems);
     };
 
-    const handleRemoveItem = (index) => {
-        const newItems = [...budgetItems];
-        newItems.splice(index, 1);
+    const handleRemoveItem = (id) => {
+        const newItems = budgetItems.filter((item) => item.id !== id);
         setBudgetItems(newItems);
+        handleBudgetChange(newItems);
     };
 
-    const handleChange = (event, index) => {
+    const handleChange = (event, id) => {
         const { name, value } = event.target;
-        const newItems = [...budgetItems];
-        newItems[index][name] = value;
+        const newItems = budgetItems.map((item) => {
+            if (item.id === id) {
+                return { ...item, [name]: value };
+            }
+            return item;
+        });
         setBudgetItems(newItems);
+        handleBudgetChange(newItems);
     };
 
     const data = budgetItems
@@ -64,7 +72,7 @@ const BudgetSection = () => {
                         <Button
                             variant="outlined"
                             size="small"
-                            onClick={() => handleRemoveItem(index)}
+                            onClick={() => handleRemoveItem(item.id)}
                         >
                             Remove
                         </Button>

@@ -1,7 +1,25 @@
 from flask_sqlalchemy import SQLAlchemy
 from enum import Enum
+from datetime import datetime
 
 db = SQLAlchemy()
+
+
+class TokenBlacklist(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    jti = db.Column(db.String(36), nullable=False, unique=True)
+    token_type = db.Column(db.String(10), nullable=False)
+    revoked_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+
+    @classmethod
+    def is_token_revoked(cls, jti, token_type):
+        return bool(cls.query.filter_by(jti=jti, token_type=token_type).first())
+
+    @classmethod
+    def add_revoked_token(cls, jti, token_type):
+        token = cls(jti=jti, token_type=token_type)
+        db.session.add(token)
+        db.session.commit()
 
 
 class ResearcherPosition(Enum):
@@ -26,6 +44,7 @@ class User(db.Model):
     password = db.Column(db.String(255), nullable=False)
     # role = db.Column(Enum(UserRole), nullable=False)
     role = db.Column(db.Enum('admin', 'researcher', 'juridical_person', 'supporter', name='roles'))
+    refresh_token = db.Column(db.String(800))
 
 
 class Researcher(db.Model):
