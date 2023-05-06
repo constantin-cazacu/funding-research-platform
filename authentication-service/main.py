@@ -1,7 +1,6 @@
 from flask import Flask, request, make_response
 from flask_restful import Api, Resource
 from flask_cors import CORS
-from flask_migrate import Migrate
 from flask_jwt_extended import JWTManager, jwt_required, get_jwt_identity, create_access_token, create_refresh_token, jwt_manager, get_jwt, verify_jwt_in_request, get_jti
 from werkzeug.security import generate_password_hash, check_password_hash
 from models import db, User, Researcher, JuridicalPerson, TokenBlacklist
@@ -31,7 +30,10 @@ db.init_app(app)
 api = Api(app)
 jwt = JWTManager(app)
 CORS(app)
-migrate = Migrate(app, db)
+# Add prometheus wsgi middleware to route /metrics requests
+app.wsgi_app = DispatcherMiddleware(app.wsgi_app, {
+    '/metrics': make_wsgi_app()
+})
 
 # Initialize casbin enforcer with model and policy files
 e = Enforcer('model.conf', 'policy.csv')
@@ -51,10 +53,6 @@ role_permissions = {
 # Define a Prometheus counter to track the number of new users
 new_user_counter = Counter('new_users', 'Number of new users per week', ['week'])
 
-# Add prometheus wsgi middleware to route /metrics requests
-app.wsgi_app = DispatcherMiddleware(app.wsgi_app, {
-    '/metrics': make_wsgi_app()
-})
 
 def jwt_required(fn):
     @wraps(fn)
