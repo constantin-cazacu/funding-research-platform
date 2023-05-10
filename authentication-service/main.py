@@ -36,13 +36,6 @@ app.wsgi_app = DispatcherMiddleware(app.wsgi_app, {
     '/metrics': make_wsgi_app()
 })
 
-# Define roles and their corresponding permissions
-role_permissions = {
-    'supporter': ['view_project', 'fund_project'],
-    'researcher': ['view_project', 'create_project', 'fund_project'],
-    'business': ['view_project', 'create_project', 'fund_project'],
-    'admin': ['view_project', 'evaluate_project']
-}
 scheduler = BackgroundScheduler()
 
 # Create the database tables
@@ -94,12 +87,6 @@ def handle_options():
         'Access-Control-Allow-Headers': 'Content-Type, Authorization'
     }
     return {'status': 'ok'}, 200, headers
-
-
-def increase_user_counter():
-    # Increment the new user counter with the current week number as a label
-    current_week = datetime.now().isocalendar()[1]
-    new_user_counter.labels(week=current_week).inc()
 
 
 def is_jwt_expired(expiring_time):
