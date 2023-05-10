@@ -1,3 +1,4 @@
+from apscheduler.schedulers.background import BackgroundScheduler
 from flask import Flask, request, make_response
 from flask_restful import Api, Resource
 from flask_cors import CORS
@@ -7,12 +8,11 @@ from models import db, User, Researcher, JuridicalPerson, TokenBlacklist
 from dotenv import load_dotenv
 import os
 from datetime import datetime, timedelta
-import time
 from functools import wraps
-from prometheus_client import Counter, make_wsgi_app
-from werkzeug.middleware.dispatcher import DispatcherMiddleware
 import requests
-
+from prometheus_client import Counter, make_wsgi_app, Gauge
+from werkzeug.middleware.dispatcher import DispatcherMiddleware
+import time
 
 load_dotenv()
 
@@ -36,12 +36,41 @@ app.wsgi_app = DispatcherMiddleware(app.wsgi_app, {
     '/metrics': make_wsgi_app()
 })
 
+# Define roles and their corresponding permissions
+role_permissions = {
+    'supporter': ['view_project', 'fund_project'],
+    'researcher': ['view_project', 'create_project', 'fund_project'],
+    'business': ['view_project', 'create_project', 'fund_project'],
+    'admin': ['view_project', 'evaluate_project']
+}
+scheduler = BackgroundScheduler()
+
 # Create the database tables
 # with app.app_context():
 #     db.create_all()
 
 # Define a Prometheus counter to track the number of new users
 new_user_counter = Counter('new_users', 'Number of new users per week', ['week'])
+# Define a Gauge metric for the 'up' metric
+up_metric = Gauge('up', '1 if the target is up, 0 if it is down')
+
+
+def increase_user_counter():
+    # Increment the new user counter with the current week number as a label
+    current_week = datetime.now().isocalendar()[1]
+    new_user_counter.labels(week=current_week).inc()
+
+
+def update_up_metric():
+    # check the status of the application here
+    status = 1  # set to 1 if the application is up, 0 if it is down
+    up_metric.set(status)
+
+
+# update the application status every 10 seconds
+scheduler.add_job(update_up_metric, 'interval', seconds=10)
+# start the scheduler
+scheduler.start()
 
 
 def is_token_revoked(fn):
