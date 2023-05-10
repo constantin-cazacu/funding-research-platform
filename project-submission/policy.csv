@@ -1,0 +1,9 @@
+p, supporter, project, read
+p, supporter, project, fund
+p, researcher, project, submit
+p, researcher, project, update
+p, researcher, project, delete
+p, business, project, evaluate
+p, admin, project, create
+g, researcher, supporter
+g, business, researcher
