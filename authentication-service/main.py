@@ -46,6 +46,9 @@ scheduler = BackgroundScheduler()
 new_user_counter = Counter('new_users', 'Number of new users per week', ['week'])
 # Define a Gauge metric for the 'up' metric
 up_metric = Gauge('up', '1 if the target is up, 0 if it is down')
+researcher_users_total = Counter('researcher_users', 'Total number of researcher users')
+business_users_total = Counter('business_users', 'Total number of business users')
+supporter_users_total = Counter('supporter_users', 'Total number of supporter users')
 
 
 def increase_user_counter():
@@ -64,6 +67,15 @@ def update_up_metric():
 scheduler.add_job(update_up_metric, 'interval', seconds=10)
 # start the scheduler
 scheduler.start()
+
+
+def count_total_nr_users_by_type(user_type):
+    if user_type == 'researcher':
+        researcher_users_total.inc()
+    elif user_type == 'business':
+        business_users_total.inc()
+    elif user_type == 'supporter':
+        supporter_users_total.inc()
 
 
 def is_token_revoked(fn):
@@ -173,6 +185,9 @@ class ResearcherRegister(Resource):
         db.session.add(researcher)
         db.session.commit()
 
+        user_type = 'researcher'
+        count_total_nr_users_by_type(user_type)
+
         increase_user_counter()
 
         return make_response({'message': 'Success! {} registered as a researcher'.format(email)}, 201)
@@ -211,6 +226,9 @@ class BusinessRegister(Resource):
         db.session.add(juridical_person)
         db.session.commit()
 
+        user_type = 'business'
+        count_total_nr_users_by_type(user_type)
+
         increase_user_counter()
 
         return make_response({'message': 'Success! {} registered as a juridical person'.format(email)}, 201)
@@ -240,6 +258,9 @@ class SupporterRegister(Resource):
         # Add the user to the database
         db.session.add(user)
         db.session.commit()
+
+        user_type = 'supporter'
+        count_total_nr_users_by_type(user_type)
 
         increase_user_counter()
 
