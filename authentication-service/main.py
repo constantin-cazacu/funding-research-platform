@@ -1,16 +1,17 @@
 from flask import Flask, request, make_response
 from flask_restful import Api, Resource
 from flask_cors import CORS
-from flask_jwt_extended import JWTManager, jwt_required, get_jwt_identity, create_access_token, create_refresh_token, jwt_manager, get_jwt, verify_jwt_in_request, get_jti
+from flask_jwt_extended import JWTManager, jwt_required, get_jwt_identity, create_access_token, create_refresh_token, get_jwt, verify_jwt_in_request, get_jti, decode_token
 from werkzeug.security import generate_password_hash, check_password_hash
 from models import db, User, Researcher, JuridicalPerson, TokenBlacklist
 from dotenv import load_dotenv
-from casbin import Enforcer
 import os
 from datetime import datetime, timedelta
+import time
 from functools import wraps
-from prometheus_client import Counter, start_http_server, make_wsgi_app
+from prometheus_client import Counter, make_wsgi_app
 from werkzeug.middleware.dispatcher import DispatcherMiddleware
+import requests
 
 
 load_dotenv()
@@ -23,8 +24,8 @@ app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY')
 app.config['JWT_SECRET_KEY'] = os.environ.get('JWT_SECRET_KEY')
 app.config['JWT_BLACKLIST_ENABLED'] = True
 app.config['JWT_BLACKLIST_TOKEN_CHECKS'] = ['access', 'refresh']
-app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(hours=1)
-app.config['JWT_REFRESH_TOKEN_EXPIRES'] = timedelta(days=30)
+app.config['JWT_ACCESS_TOKEN_EXPIRES'] = datetime.utcnow() + timedelta(hours=1)
+app.config['JWT_REFRESH_TOKEN_EXPIRES'] = datetime.utcnow() + timedelta(days=30)
 app.config['JWT_BLACKLIST_TOKEN_CLASS'] = 'app.models.TokenBlacklist'
 db.init_app(app)
 api = Api(app)
@@ -35,17 +36,6 @@ app.wsgi_app = DispatcherMiddleware(app.wsgi_app, {
     '/metrics': make_wsgi_app()
 })
 
-# Initialize casbin enforcer with model and policy files
-e = Enforcer('model.conf', 'policy.csv')
-
-# Define roles and their corresponding permissions
-role_permissions = {
-    'supporter': ['view_project', 'fund_project'],
-    'researcher': ['view_project', 'create_project', 'fund_project'],
-    'business': ['view_project', 'create_project', 'fund_project'],
-    'admin': ['view_project', 'evaluate_project']
-}
-
 # Create the database tables
 # with app.app_context():
 #     db.create_all()
@@ -54,7 +44,7 @@ role_permissions = {
 new_user_counter = Counter('new_users', 'Number of new users per week', ['week'])
 
 
-def jwt_required(fn):
+def is_token_revoked(fn):
     @wraps(fn)
     def wrapper(*args, **kwargs):
         verify_jwt_in_request()
@@ -81,6 +71,52 @@ def increase_user_counter():
     # Increment the new user counter with the current week number as a label
     current_week = datetime.now().isocalendar()[1]
     new_user_counter.labels(week=current_week).inc()
+
+
+def is_jwt_expired(expiring_time):
+    # Check if the token is close to expiring (within 5 minutes)
+    if (expiring_time - time.time()) < 300:
+        return True
+    else:
+        return False
+
+
+def get_refresh_token(current_user):
+    user = User.query.filter_by(email=current_user).first()
+    return user.refresh_token
+
+
+def is_refresh_jwt_active(current_user):
+    # Query the database for the user
+    user = User.query.filter_by(email=current_user).first()
+    if user is None:
+        return False
+    else:
+        refresh_token = decode_token(user.refresh_token)
+        expiring_time = refresh_token['exp']
+        if is_jwt_expired(expiring_time):
+            return True
+        else:
+            return False
+
+
+class RefreshAccessToken(Resource):
+    @jwt_required()
+    def post(self):
+        # Get current user identity
+        current_user = get_jwt_identity()
+        # Get the jwt claims from the current token
+        jwt_claims = get_jwt()
+        if is_refresh_jwt_active(current_user):
+            # Create the new access JWT
+            access_token = create_access_token(identity=current_user,
+                                               expires_delta=app.config['JWT_ACCESS_TOKEN_EXPIRES'],
+                                               additional_claims={'role': jwt_claims['role']})
+
+            return make_response({'message': 'Access token refreshed successfully',
+                                  'access_token': access_token}, 200)
+        else:
+            return make_response({'message': 'Refresh token expired, please login'}, 401)
 
 
 class ResearcherRegister(Resource):
@@ -223,22 +259,39 @@ class Login(Resource):
 
 
 class Logout(Resource):
+    @is_token_revoked
     @jwt_required
     def post(self):
         # Get the user's email from the access token
         current_user = get_jwt_identity()
-        # Query the database for the user
-        user = User.query.filter_by(email=current_user).first()
+        refresh_token = get_refresh_token(current_user)
+        # Get the JWT ID (jti) from the refresh token
+        refresh_jti = get_jti(refresh_token)
         # Get the JWT ID (jti) from the access token
         jti = get_jwt()['jti']
-        # Get the refresh token jti from the raw JWT
-        refresh_token = user.refresh_token
-        refresh_jti = get_jti(refresh_token)
-        # Add the jti to the blacklist
+        # Add the jti and refresh_jti to the blacklist
         TokenBlacklist.add_revoked_token(jti, token_type='access')
         TokenBlacklist.add_revoked_token(refresh_jti, token_type='refresh')
 
-        return {'message': 'User logged out successfully'}, 200
+        return make_response({'message': 'User logged out successfully'}, 200)
+
+
+class CheckAuthorization(Resource):
+    @is_token_revoked
+    @jwt_required
+    def post(self):
+        # Get the current JWT
+        jwt_token = get_jwt()
+        # Get the expiration time of the JWT
+        expiring_time = jwt_token['exp']
+        if is_jwt_expired(expiring_time):
+            auth_token = request.headers.get('Authorization')
+            url = 'localhost:5001/refresh'
+            response = requests.post(url, data={}, headers={'Authorization': auth_token})
+
+            return make_response(response.json(), response.status_code)
+        else:
+            return make_response({'message': 'Authorized'}, 200)
 
 
 api.add_resource(ResearcherRegister, "/researcher/register")
@@ -246,9 +299,9 @@ api.add_resource(BusinessRegister, "/business/register")
 api.add_resource(SupporterRegister, "/supporter/register")
 api.add_resource(Login, "/login")
 api.add_resource(Logout, "/logout")
+api.add_resource(RefreshAccessToken, "/refresh")
+api.add_resource(CheckAuthorization, "/check_auth")
 
 if __name__ == '__main__':
-    # Start the Prometheus HTTP server on port 8000
-    # start_http_server(8000)
 
     app.run(debug=True, port=5001)
