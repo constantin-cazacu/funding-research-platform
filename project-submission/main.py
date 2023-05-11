@@ -69,8 +69,8 @@ def check_auth():
     return make_response(response.json(), response.status_code)
 
 
-# @jwt_required
 class ResearcherProjectSubmission(Resource):
+    @jwt_required
     def put(self):
         access_jwt = get_jwt()
         user_role = access_jwt['role']
