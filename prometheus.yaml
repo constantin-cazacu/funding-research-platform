@@ -1,0 +1,13 @@
+global:
+  scrape_interval: 15s
+
+scrape_configs:
+  - job_name: 'auth-service'
+    scrape_interval: 5s
+    static_configs:
+      - targets: ['localhost:5001']
+
+  - job_name: 'project-submission-service'
+    scrape_interval: 5s
+    static_configs:
+      - targets: [ 'localhost:5000' ]
