@@ -7,7 +7,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from models import db, User, Researcher, JuridicalPerson, TokenBlacklist
 from dotenv import load_dotenv
 import os
-from datetime import datetime, timedelta
+from datetime import timedelta
 from functools import wraps
 import requests
 from prometheus_client import Counter, make_wsgi_app, Gauge, Histogram
@@ -15,7 +15,8 @@ from werkzeug.middleware.dispatcher import DispatcherMiddleware
 import time
 import psutil
 from prometheus_flask_exporter import PrometheusMetrics
-
+from datetime import datetime
+from flask import g
 
 load_dotenv()
 
@@ -39,8 +40,6 @@ app.wsgi_app = DispatcherMiddleware(app.wsgi_app, {
     '/metrics': make_wsgi_app()
 })
 
-scheduler = BackgroundScheduler()
-# metrics = PrometheusMetrics(app)
 
 # Create the database tables
 # with app.app_context():
@@ -52,15 +51,33 @@ new_user_counter = Counter('new_users', 'Number of new users per week', ['week']
 up_metric = Gauge('up', '1 if the target is up, 0 if it is down')
 # Define Counter metrics for tracking total number of user per user type
 researcher_users_total = Counter('researcher_users', 'Total number of researcher users')
-business_users_total = Counter('business_users', 'Total number of business users')
+juridical_users_total = Counter('juridical_users', 'Total number of juridical users')
 supporter_users_total = Counter('supporter_users', 'Total number of supporter users')
 # Create a gauge metric to track CPU usage, memory usage and disk usage
 cpu_usage = Gauge('cpu_usage', 'CPU usage in percentage')
 memory_usage = Gauge('memory_usage', 'Current memory usage in bytes')
 disk_usage = Gauge('disk_usage', 'Disk usage in bytes')
 # Define metrics for calculating Average Response time
-# REQUEST_COUNT = Counter('request_count', 'Number of requests', ['method', 'endpoint', 'http_status'])
-# REQUEST_LATENCY = Histogram('request_latency_seconds', 'Request latency', ['method', 'endpoint'])
+REQUEST_LATENCY = Histogram(
+    'requests_latency_seconds',
+    'Request latency in seconds',
+    buckets=[0.1, 0.5, 1, 2, 5]
+)
+
+
+@app.before_request
+def start_timer():
+    g.start = datetime.now()
+
+
+@app.after_request
+def stop_timer(response):
+    if hasattr(g, 'start'):
+        end = datetime.now()
+        duration = end - g.start
+        resp_time = duration.total_seconds()
+        REQUEST_LATENCY.observe(resp_time)
+    return response
 
 
 def increase_user_counter():
@@ -73,21 +90,6 @@ def update_up_metric():
     # check the status of the application here
     status = 1  # set to 1 if the application is up, 0 if it is down
     up_metric.set(status)
-
-
-# update the application status every 10 seconds
-scheduler.add_job(update_up_metric, 'interval', seconds=10)
-# start the scheduler
-scheduler.start()
-
-
-def count_total_nr_users_by_type(user_type):
-    if user_type == 'researcher':
-        researcher_users_total.inc()
-    elif user_type == 'business':
-        business_users_total.inc()
-    elif user_type == 'supporter':
-        supporter_users_total.inc()
 
 
 def collect_cpu_usage():
@@ -108,6 +110,28 @@ def get_disk_usage():
         disk_usage.set(disk_stats.used)
 
 
+def count_total_nr_users_by_type(user_type, db_total_nr):
+    if user_type == 'researcher':
+        researcher_users_total.inc(db_total_nr)
+    elif user_type == 'juridical_person':
+        juridical_users_total.inc(db_total_nr)
+    elif user_type == 'supporter':
+        supporter_users_total.inc(db_total_nr)
+
+
+def get_database_users():
+    # Query the total number of users by role
+    db_total_researchers = User.query.filter_by(role='researcher').count()
+    print('total nr of researchers', db_total_researchers)
+    count_total_nr_users_by_type('researcher', db_total_researchers)
+    db_total_juridical = User.query.filter_by(role='juridical_person').count()
+    print('total nr of juridical users', db_total_juridical)
+    count_total_nr_users_by_type('juridical_person', db_total_juridical)
+    db_total_supporters = User.query.filter_by(role='supporter').count()
+    print('total nr of supporters', db_total_supporters)
+    count_total_nr_users_by_type('supporter', db_total_supporters)
+
+
 def is_token_revoked(fn):
     @wraps(fn)
     def wrapper(*args, **kwargs):
@@ -119,19 +143,6 @@ def is_token_revoked(fn):
     return wrapper
 
 
-# Initialize Prometheus metrics
-# metrics = PrometheusMetrics(app, group_by='path')
-# metrics.register_default(
-#     metrics.counter(
-#         'my_request_rate',
-#         'Request rate per endpoint',
-#         labels={
-#             'endpoint': lambda: request.path,
-#             'status': lambda r: r.status_code,
-#             'method': lambda: request.method
-#         }
-#     )
-# )
 metrics = PrometheusMetrics(app, group_by='path',
                             request_rate_counter='my_request_rate',
                             request_rate_labels={'status': lambda r: r.status_code})
@@ -234,7 +245,7 @@ class ResearcherRegister(Resource):
         db.session.commit()
 
         user_type = 'researcher'
-        count_total_nr_users_by_type(user_type)
+        count_total_nr_users_by_type(user_type, 1)
 
         increase_user_counter()
 
@@ -274,8 +285,8 @@ class BusinessRegister(Resource):
         db.session.add(juridical_person)
         db.session.commit()
 
-        user_type = 'business'
-        count_total_nr_users_by_type(user_type)
+        user_type = 'juridical_person'
+        count_total_nr_users_by_type(user_type, 1)
 
         increase_user_counter()
 
@@ -308,7 +319,7 @@ class SupporterRegister(Resource):
         db.session.commit()
 
         user_type = 'supporter'
-        count_total_nr_users_by_type(user_type)
+        count_total_nr_users_by_type(user_type, 1)
 
         increase_user_counter()
 
@@ -387,10 +398,22 @@ api.add_resource(Logout, "/logout")
 api.add_resource(RefreshAccessToken, "/refresh")
 api.add_resource(CheckAuthorization, "/check_auth")
 
+
 if __name__ == '__main__':
+    scheduler = BackgroundScheduler()
+    # update the application status every 10 seconds
+    scheduler.add_job(update_up_metric, 'interval', seconds=10)
+    # Add the jobs to the scheduler
+    # scheduler.add_job(collect_cpu_usage, 'interval', seconds=30)
+    # scheduler.add_job(update_memory_usage, 'interval', seconds=30)
+    # scheduler.add_job(get_disk_usage, 'interval', seconds=30)
+    # start the scheduler
+    scheduler.start()
+
+    with app.app_context():
+        get_database_users()
+
     app.run(debug=True, port=5001)
 
-    # Start collecting CPU usage metrics
-    collect_cpu_usage()
-    update_memory_usage()
-    get_disk_usage()
+    # Stop the scheduler when the application is stopped
+    # scheduler.shutdown()
