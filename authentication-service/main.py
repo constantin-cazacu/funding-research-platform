@@ -10,9 +10,12 @@ import os
 from datetime import datetime, timedelta
 from functools import wraps
 import requests
-from prometheus_client import Counter, make_wsgi_app, Gauge
+from prometheus_client import Counter, make_wsgi_app, Gauge, Histogram
 from werkzeug.middleware.dispatcher import DispatcherMiddleware
 import time
+import psutil
+from prometheus_flask_exporter import PrometheusMetrics
+
 
 load_dotenv()
 
@@ -37,6 +40,7 @@ app.wsgi_app = DispatcherMiddleware(app.wsgi_app, {
 })
 
 scheduler = BackgroundScheduler()
+# metrics = PrometheusMetrics(app)
 
 # Create the database tables
 # with app.app_context():
@@ -46,9 +50,17 @@ scheduler = BackgroundScheduler()
 new_user_counter = Counter('new_users', 'Number of new users per week', ['week'])
 # Define a Gauge metric for the 'up' metric
 up_metric = Gauge('up', '1 if the target is up, 0 if it is down')
+# Define Counter metrics for tracking total number of user per user type
 researcher_users_total = Counter('researcher_users', 'Total number of researcher users')
 business_users_total = Counter('business_users', 'Total number of business users')
 supporter_users_total = Counter('supporter_users', 'Total number of supporter users')
+# Create a gauge metric to track CPU usage, memory usage and disk usage
+cpu_usage = Gauge('cpu_usage', 'CPU usage in percentage')
+memory_usage = Gauge('memory_usage', 'Current memory usage in bytes')
+disk_usage = Gauge('disk_usage', 'Disk usage in bytes')
+# Define metrics for calculating Average Response time
+# REQUEST_COUNT = Counter('request_count', 'Number of requests', ['method', 'endpoint', 'http_status'])
+# REQUEST_LATENCY = Histogram('request_latency_seconds', 'Request latency', ['method', 'endpoint'])
 
 
 def increase_user_counter():
@@ -78,6 +90,24 @@ def count_total_nr_users_by_type(user_type):
         supporter_users_total.inc()
 
 
+def collect_cpu_usage():
+    while True:
+        cpu_percent = psutil.cpu_percent(interval=1)
+        cpu_usage.set(cpu_percent)
+
+
+def update_memory_usage():
+    while True:
+        memory_stats = psutil.virtual_memory()
+        memory_usage.set(memory_stats.used)
+
+
+def get_disk_usage():
+    while True:
+        disk_stats = psutil.disk_usage('/')
+        disk_usage.set(disk_stats.used)
+
+
 def is_token_revoked(fn):
     @wraps(fn)
     def wrapper(*args, **kwargs):
@@ -87,6 +117,24 @@ def is_token_revoked(fn):
             return make_response({"message": "Token has been revoked"}, 401)
         return fn(*args, **kwargs)
     return wrapper
+
+
+# Initialize Prometheus metrics
+# metrics = PrometheusMetrics(app, group_by='path')
+# metrics.register_default(
+#     metrics.counter(
+#         'my_request_rate',
+#         'Request rate per endpoint',
+#         labels={
+#             'endpoint': lambda: request.path,
+#             'status': lambda r: r.status_code,
+#             'method': lambda: request.method
+#         }
+#     )
+# )
+metrics = PrometheusMetrics(app, group_by='path',
+                            request_rate_counter='my_request_rate',
+                            request_rate_labels={'status': lambda r: r.status_code})
 
 
 # Create the API resources
@@ -340,5 +388,9 @@ api.add_resource(RefreshAccessToken, "/refresh")
 api.add_resource(CheckAuthorization, "/check_auth")
 
 if __name__ == '__main__':
-
     app.run(debug=True, port=5001)
+
+    # Start collecting CPU usage metrics
+    collect_cpu_usage()
+    update_memory_usage()
+    get_disk_usage()

@@ -8,6 +8,9 @@ from casbin import Enforcer
 from flask_jwt_extended import JWTManager, jwt_required, get_jwt
 from datetime import datetime, timedelta
 import requests
+from prometheus_client import Counter, make_wsgi_app, Gauge
+from werkzeug.middleware.dispatcher import DispatcherMiddleware
+from apscheduler.schedulers.background import BackgroundScheduler
 
 
 load_dotenv()
@@ -28,11 +31,35 @@ jwt = JWTManager(app)
 enforcer = Enforcer('model.conf', 'policy.csv')
 enforcer.enable_log = True
 
+# Add prometheus wsgi middleware to route /metrics requests
+app.wsgi_app = DispatcherMiddleware(app.wsgi_app, {
+    '/metrics': make_wsgi_app()
+})
+
+scheduler = BackgroundScheduler()
+
+
 # with app.app_context():
 #     db.create_all()
 
 
-@app.before_request
+# Define a Gauge metric for the 'up' metric
+up_metric = Gauge('up', '1 if the target is up, 0 if it is down')
+
+
+def update_up_metric():
+    # check the status of the application here
+    status = 1  # set to 1 if the application is up, 0 if it is down
+    up_metric.set(status)
+
+
+# update the application status every 10 seconds
+scheduler.add_job(update_up_metric, 'interval', seconds=10)
+# start the scheduler
+scheduler.start()
+
+
+# @app.before_request
 @jwt_required
 def check_auth():
     auth_token = request.headers.get('Authorization')
@@ -42,7 +69,7 @@ def check_auth():
     return make_response(response.json(), response.status_code)
 
 
-@jwt_required
+# @jwt_required
 class ResearcherProjectSubmission(Resource):
     def put(self):
         access_jwt = get_jwt()
@@ -76,5 +103,6 @@ class ResearcherProjectSubmission(Resource):
 api.add_resource(ResearcherProjectSubmission, "/researcher/submit_project")
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, port=5000)
+
 
