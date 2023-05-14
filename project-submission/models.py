@@ -13,5 +13,23 @@ class ResearcherProject(db.Model):
     timeline = db.Column(db.JSON)
     status = db.Column(db.Enum('accepted', 'rejected', 'pending', name='status'))
 
+    @classmethod
+    def to_dict(cls):
+        return {
+            'id': cls.id,
+            'title': cls.title,
+            'abstract': cls.abstract,
+            'fields_of_study': cls.fields_of_study,
+            'budget': cls.budget,
+            'timeline': cls.timeline,
+            'status': cls.status
+        }
+
     def __repr__(self):
-        return f"<ResearcherProject(title='{self.title}', status='{self.status}')>"
+        return f"<ResearcherProject(id='{self.id}'," \
+               f"title='{self.title}', " \
+               f"abstract='{self.abstract}', " \
+               f"fields_of_study='{self.fields_of_study}', " \
+               f"budget='{self.budget}', " \
+               f"timeline='{self.timeline}', " \
+               f"status='{self.status}')>"

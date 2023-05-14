@@ -38,6 +38,27 @@
             </Attribute>
           </value>
         </entry>
+        <entry key="\front-end\pages\admin_panel.js">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\front-end\pages\index.js">
+          <value>
+            <Attribute>
+              <option name="separator" value=";" />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\front-end\pages\submit.js">
+          <value>
+            <Attribute>
+              <option name="separator" value=";" />
+            </Attribute>
+          </value>
+        </entry>
         <entry key="\project-submission\.gitignore">
           <value>
             <Attribute>
