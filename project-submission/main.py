@@ -12,6 +12,7 @@ import requests
 from prometheus_client import Counter, make_wsgi_app, Gauge
 from werkzeug.middleware.dispatcher import DispatcherMiddleware
 from apscheduler.schedulers.background import BackgroundScheduler
+from flask_mail import Mail
 
 
 load_dotenv()
@@ -23,10 +24,19 @@ app.config['JWT_ACCESS_TOKEN_EXPIRES'] = datetime.utcnow() + timedelta(hours=1)
 app.config['JWT_REFRESH_TOKEN_EXPIRES'] = datetime.utcnow() + timedelta(days=30)
 app.config['JWT_SECRET_KEY'] = os.environ.get('JWT_SECRET_KEY')
 
+app.config['MAIL_SERVER']='smtp.gmail.com'
+app.config['MAIL_PORT'] = 465
+app.config['MAIL_USERNAME'] = 'test8450test@gmail.com'
+app.config['MAIL_PASSWORD'] = 'e87zjAPD'
+app.config['MAIL_USE_TLS'] = False
+app.config['MAIL_USE_SSL'] = True
+
 db.init_app(app)
 api = Api(app)
 CORS(app)
 jwt = JWTManager(app)
+mail = Mail(app)
+
 
 # Initialize casbin enforcer with model and policy files
 enforcer = Enforcer('model.conf', 'policy.csv')
@@ -75,7 +85,7 @@ scheduler.start()
 @jwt_required
 def check_auth():
     auth_token = request.headers.get('Authorization')
-    url = 'localhost:5001/authorized'
+    url = 'http://localhost:5001/authorized'
     response = requests.post(url, data={}, headers={'Authorization': auth_token})
 
     return make_response(response.json(), response.status_code)

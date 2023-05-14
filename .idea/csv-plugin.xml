@@ -59,6 +59,20 @@
             </Attribute>
           </value>
         </entry>
+        <entry key="\notification-service\.env">
+          <value>
+            <Attribute>
+              <option name="separator" value=":" />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\notification-service\notification.py">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
         <entry key="\project-submission\.gitignore">
           <value>
             <Attribute>
