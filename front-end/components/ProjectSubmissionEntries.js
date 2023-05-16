@@ -78,13 +78,24 @@ const ProjectSubmissionEntries = () => {
                       {/* Render the project item */}
                       <Typography variant="h6">{project.title}</Typography>
                       <Typography variant="body1">{project.abstract}</Typography>
-                      <Typography variant="body1">{project.fields_of_study}</Typography>
-                      <Typography variant="body1">{project.budget.name}: {project.budget.sum}</Typography>
-                      <Typography variant="body1">{project.timeline.name}: {project.timeline.date}</Typography>
+                      <Typography variant="body1">
+                        Fields of Study: {project.fields_of_study.join(", ")}
+                      </Typography>
+                      {project.budget.map(item => (
+                          <Typography variant="body1" key={item.id}>
+                            Budget: {item.name}: {item.sum}
+                          </Typography>
+                      ))}
+                      {project.timeline.map(item => (
+                          <Typography variant="body1" key={item.name}>
+                            Timeline: {item.name}: {new Date(item.date).toLocaleDateString()}
+                          </Typography>
+                      ))}
                       <Typography variant="body1">{project.status}</Typography>
                     </Grid>
                 ))}
               </Grid>
+
               <Box sx={{ mt: 4, display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 2 }}>
                 {currentPage > 1 && (
                     <Button variant="contained" onClick={handleLoadPrevious}>
