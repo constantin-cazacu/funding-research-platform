@@ -1,4 +1,3 @@
-import json
 from flask import Flask, request, make_response
 from flask_restful import Api, Resource, reqparse
 from flask_cors import CORS
@@ -12,7 +11,6 @@ import requests
 from prometheus_client import Counter, make_wsgi_app, Gauge
 from werkzeug.middleware.dispatcher import DispatcherMiddleware
 from apscheduler.schedulers.background import BackgroundScheduler
-from flask_mail import Mail
 
 
 load_dotenv()
@@ -24,18 +22,10 @@ app.config['JWT_ACCESS_TOKEN_EXPIRES'] = datetime.utcnow() + timedelta(hours=1)
 app.config['JWT_REFRESH_TOKEN_EXPIRES'] = datetime.utcnow() + timedelta(days=30)
 app.config['JWT_SECRET_KEY'] = os.environ.get('JWT_SECRET_KEY')
 
-app.config['MAIL_SERVER']='smtp.gmail.com'
-app.config['MAIL_PORT'] = 465
-app.config['MAIL_USERNAME'] = 'test8450test@gmail.com'
-app.config['MAIL_PASSWORD'] = 'e87zjAPD'
-app.config['MAIL_USE_TLS'] = False
-app.config['MAIL_USE_SSL'] = True
-
 db.init_app(app)
 api = Api(app)
 CORS(app)
 jwt = JWTManager(app)
-mail = Mail(app)
 
 
 # Initialize casbin enforcer with model and policy files
@@ -126,7 +116,7 @@ class PendingProjects(Resource):
     def __init__(self):
         self.parser = reqparse.RequestParser()
         self.parser.add_argument('page', type=int, location='args', default=1)
-        self.parser.add_argument('pageSize', type=int, location='args', default=10)
+        self.parser.add_argument('pageSize', type=int, location='args', default=5)
 
     def get(self):
         args = self.parser.parse_args()
@@ -154,8 +144,32 @@ class PendingProjects(Resource):
         return make_response(result)
 
 
+class EvaluateProjects(Resource):
+    def __init__(self):
+        self.parser = reqparse.RequestParser()
+        self.parser.add_argument('status', type=str, location='args', default="pending")
+        self.parser.add_argument('id', type=int, location='args', default=None)
+
+    def post(self):
+        args = self.parser.parse_args()
+        if args['status'] == "accepted":
+            print(f"Project {args['id']} accepted")
+            # update project status
+            # send notification
+            return make_response({"message": f"Project {args['id']} has been accepted"}, 200)
+        elif args['status'] == "rejected":
+            print(f"Project {args['id']} rejected")
+            # update project status
+            # send notification
+            return make_response({"message": f"Project {args['id']} has been rejected"}, 200)
+        elif args['status'] == "pending":
+            print(f"Project {args['id']} unchanged")
+            return make_response({"message": f"Project {args['id']} has been unchanged"}, 200)
+
+
 api.add_resource(ResearcherProjectSubmission, "/researcher/submit_project")
 api.add_resource(PendingProjects, "/pending_projects")
+api.add_resource(PendingProjects, "/evaluate_project")
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)
