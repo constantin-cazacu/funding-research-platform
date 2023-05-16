@@ -10,7 +10,7 @@ from flask_mail import Mail, Message
 load_dotenv()
 app = Flask(__name__)
 
-app.config['MAIL_SERVER']='smtp.gmail.com'
+app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config['MAIL_PORT'] = 465
 app.config['MAIL_USERNAME'] = os.environ.get('EMAIL_USER')
 app.config['MAIL_PASSWORD'] = os.environ.get('EMAIL_PASSWORD')
@@ -40,7 +40,7 @@ def send_email(to, subject, body):
 
 class SendEmail(Resource):
     def get(self):
-        send_email(os.environ.get('EMAIL_RECEIVER'), 'Test Email', 'This is a test email.')
+        # send_email(os.environ.get('EMAIL_RECEIVER'), 'Test Email', 'This is a test email.')
         return make_response({"message": "Email sent!"}, 200)
 
 
