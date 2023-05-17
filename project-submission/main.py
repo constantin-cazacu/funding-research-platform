@@ -72,7 +72,7 @@ scheduler.start()
 
 
 # @app.before_request
-@jwt_required
+@jwt_required()
 def check_auth():
     auth_token = request.headers.get('Authorization')
     url = 'http://localhost:5001/authorized'
@@ -154,11 +154,17 @@ class EvaluateProjects(Resource):
         args = self.parser.parse_args()
         if args['status'] == "accepted":
             print(f"Project {args['id']} accepted")
+            project = ResearcherProject.query.filter_by(id=args['id']).first()
+            project.status = 'accepted'
+            db.session.commit()
             # update project status
             # send notification
             return make_response({"message": f"Project {args['id']} has been accepted"}, 200)
         elif args['status'] == "rejected":
             print(f"Project {args['id']} rejected")
+            project = ResearcherProject.query.filter_by(id=args['id']).first()
+            project.status = 'rejected'
+            db.session.commit()
             # update project status
             # send notification
             return make_response({"message": f"Project {args['id']} has been rejected"}, 200)
@@ -169,7 +175,7 @@ class EvaluateProjects(Resource):
 
 api.add_resource(ResearcherProjectSubmission, "/researcher/submit_project")
 api.add_resource(PendingProjects, "/pending_projects")
-api.add_resource(PendingProjects, "/evaluate_project")
+api.add_resource(EvaluateProjects, "/evaluate_projects")
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)
