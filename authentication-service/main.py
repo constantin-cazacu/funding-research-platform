@@ -13,7 +13,7 @@ import requests
 from prometheus_client import Counter, make_wsgi_app, Gauge, Histogram
 from werkzeug.middleware.dispatcher import DispatcherMiddleware
 import time
-import psutil
+# import psutil
 from prometheus_flask_exporter import PrometheusMetrics
 from datetime import datetime
 from flask import g
@@ -28,9 +28,10 @@ app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY')
 app.config['JWT_SECRET_KEY'] = os.environ.get('JWT_SECRET_KEY')
 app.config['JWT_BLACKLIST_ENABLED'] = True
 app.config['JWT_BLACKLIST_TOKEN_CHECKS'] = ['access', 'refresh']
-app.config['JWT_ACCESS_TOKEN_EXPIRES'] = datetime.utcnow() + timedelta(hours=1)
-app.config['JWT_REFRESH_TOKEN_EXPIRES'] = datetime.utcnow() + timedelta(days=30)
+app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(hours=1)
+app.config['JWT_REFRESH_TOKEN_EXPIRES'] = timedelta(days=30)
 app.config['JWT_BLACKLIST_TOKEN_CLASS'] = 'app.models.TokenBlacklist'
+app.config["JWT_TOKEN_LOCATION"] = ["headers", "cookies", "json", "query_string"]
 db.init_app(app)
 api = Api(app)
 jwt = JWTManager(app)
@@ -92,22 +93,22 @@ def update_up_metric():
     up_metric.set(status)
 
 
-def collect_cpu_usage():
-    while True:
-        cpu_percent = psutil.cpu_percent(interval=1)
-        cpu_usage.set(cpu_percent)
-
-
-def update_memory_usage():
-    while True:
-        memory_stats = psutil.virtual_memory()
-        memory_usage.set(memory_stats.used)
-
-
-def get_disk_usage():
-    while True:
-        disk_stats = psutil.disk_usage('/')
-        disk_usage.set(disk_stats.used)
+# def collect_cpu_usage():
+#     while True:
+#         cpu_percent = psutil.cpu_percent(interval=1)
+#         cpu_usage.set(cpu_percent)
+#
+#
+# def update_memory_usage():
+#     while True:
+#         memory_stats = psutil.virtual_memory()
+#         memory_usage.set(memory_stats.used)
+#
+#
+# def get_disk_usage():
+#     while True:
+#         disk_stats = psutil.disk_usage('/')
+#         disk_usage.set(disk_stats.used)
 
 
 def count_total_nr_users_by_type(user_type, db_total_nr):
@@ -181,9 +182,11 @@ def is_refresh_jwt_active(current_user):
     else:
         refresh_token = decode_token(user.refresh_token)
         expiring_time = refresh_token['exp']
+        refresh_jti = refresh_token['jti']
         if is_jwt_expired(expiring_time):
             return True
         else:
+            TokenBlacklist.add_revoked_token(refresh_jti, token_type='refresh')
             return False
 
 
@@ -194,6 +197,7 @@ class RefreshAccessToken(Resource):
         current_user = get_jwt_identity()
         # Get the jwt claims from the current token
         jwt_claims = get_jwt()
+        TokenBlacklist.add_revoked_token(jwt_claims['jti'], token_type='access')
         if is_refresh_jwt_active(current_user):
             # Create the new access JWT
             access_token = create_access_token(identity=current_user,
@@ -349,14 +353,16 @@ class Login(Resource):
         user.refresh_token = refresh_token
         db.session.commit()
 
-        return make_response({'message': 'Login successful',
-                              'access_token': access_token,
-                              'refresh_token': refresh_token}, 200)
+        headers = {'Authorization': f'Bearer {access_token}', 'Role': f'{user.role}',
+                   'Access-Control-Expose-Headers': 'Authorization, Role',
+                   'Access-Control-Allow-Headers': 'Authorization'}
+
+        return make_response({'message': 'Login successful'}, 200, headers)
 
 
 class Logout(Resource):
     @is_token_revoked
-    @jwt_required
+    @jwt_required()
     def post(self):
         # Get the user's email from the access token
         current_user = get_jwt_identity()
@@ -374,20 +380,30 @@ class Logout(Resource):
 
 class CheckAuthorization(Resource):
     @is_token_revoked
-    @jwt_required
+    @jwt_required()
     def post(self):
         # Get the current JWT
         jwt_token = get_jwt()
+        print("right here", jwt_token)
         # Get the expiration time of the JWT
         expiring_time = jwt_token['exp']
         if is_jwt_expired(expiring_time):
             auth_token = request.headers.get('Authorization')
             url = 'localhost:5001/refresh'
             response = requests.post(url, data={}, headers={'Authorization': auth_token})
+            print('here', response)
 
             return make_response(response.json(), response.status_code)
         else:
             return make_response({'message': 'Authorized'}, 200)
+
+
+class RetrieveRole(Resource):
+    @jwt_required()
+    def post(self):
+        # Get the current JWT
+        jwt_token = get_jwt()
+        return make_response({"role": jwt_token['role']}, 200)
 
 
 api.add_resource(ResearcherRegister, "/researcher/register")
@@ -397,6 +413,7 @@ api.add_resource(Login, "/login")
 api.add_resource(Logout, "/logout")
 api.add_resource(RefreshAccessToken, "/refresh")
 api.add_resource(CheckAuthorization, "/check_auth")
+api.add_resource(RetrieveRole, "/retrieve_role")
 
 
 if __name__ == '__main__':

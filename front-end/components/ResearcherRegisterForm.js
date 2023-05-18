@@ -43,7 +43,7 @@ function ResearcherRegisterForm() {
         postData(url, jsonFormData)
             .then(jsonFormData => {
                 console.log(jsonFormData); // JSON data from response
-                router.push('/submit');
+                router.push('/login');
             })
             .catch(error => {
                 console.error(error);

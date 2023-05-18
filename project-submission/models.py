@@ -1,4 +1,6 @@
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import event
+import requests
 
 db = SQLAlchemy()
 
@@ -14,4 +16,24 @@ class ResearcherProject(db.Model):
     status = db.Column(db.Enum('accepted', 'rejected', 'pending', name='status'))
 
     def __repr__(self):
-        return f"<ResearcherProject(title='{self.title}', status='{self.status}')>"
+        return f"<ResearcherProject(id='{self.id}'," \
+               f"title='{self.title}', " \
+               f"abstract='{self.abstract}', " \
+               f"fields_of_study='{self.fields_of_study}', " \
+               f"budget='{self.budget}', " \
+               f"timeline='{self.timeline}', " \
+               f"status='{self.status}')>"
+
+    @staticmethod
+    def send_notification_to_admin(project_submission):
+        url = 'http://localhost:5008/send_email'
+        response = requests.get(url)
+        if not response.status_code == 200:
+            print(response)
+        pass
+
+
+# Set up the event listener
+@event.listens_for(ResearcherProject, 'after_insert')
+def after_project_submission_insert(mapper, connection, project_submission):
+    ResearcherProject.send_notification_to_admin(project_submission)
