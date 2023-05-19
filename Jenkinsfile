@@ -18,8 +18,6 @@ pipeline {
                 echo "Building.."
                 sh '''
                 cd 'notification-service'
-                python -m venv env
-                source env/bin/activate
                 pip install -r requirements.txt
                 '''
             }
@@ -29,7 +27,6 @@ pipeline {
                 echo "Testing.."
                 sh '''
                 cd 'notification-service'
-                source env/bin/activate
                 python3 unit_tests.py
                 '''
             }
