@@ -112,6 +112,37 @@ class ResearcherProjectSubmission(Resource):
             return make_response({'message': 'Project Submitted'}, 201)
 
 
+class JuridicalProjectSubmission(Resource):
+    # @jwt_required
+    def put(self):
+        # access_jwt = get_jwt()
+        # user_role = access_jwt['role']
+        # if not enforcer.enforce(user_role, 'project', 'submit'):
+        #     return make_response({'message': 'Permission denied'}, 403)
+        # else:
+            data = request.get_json()
+            print(request.data)
+
+            project_title = data['projectTitle']
+            selected_fields = data['selectedFields']
+            abstract = data['abstract']
+            # budget_items = data['budgetItems']
+            # timeline_items = data['timelineItems']
+            status = 'pending'
+
+            project = ResearcherProject(title=project_title,
+                                        abstract=abstract,
+                                        fields_of_study=selected_fields,
+                                        # budget=budget_items,
+                                        # timeline=timeline_items,
+                                        status=status)
+
+            db.session.add(project)
+            db.session.commit()
+
+            return make_response({'message': 'Project Submitted'}, 201)
+
+
 class PendingProjects(Resource):
     def __init__(self):
         self.parser = reqparse.RequestParser()
@@ -174,6 +205,7 @@ class EvaluateProjects(Resource):
 
 
 api.add_resource(ResearcherProjectSubmission, "/researcher/submit_project")
+api.add_resource(JuridicalProjectSubmission, "/business/submit_project")
 api.add_resource(PendingProjects, "/pending_projects")
 api.add_resource(EvaluateProjects, "/evaluate_projects")
 

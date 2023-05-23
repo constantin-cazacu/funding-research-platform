@@ -43,8 +43,8 @@ app.wsgi_app = DispatcherMiddleware(app.wsgi_app, {
 
 
 # Create the database tables
-# with app.app_context():
-#     db.create_all()
+with app.app_context():
+    db.create_all()
 
 # Define a Prometheus counter to track the number of new users
 new_user_counter = Counter('new_users', 'Number of new users per week', ['week'])
@@ -259,6 +259,7 @@ class ResearcherRegister(Resource):
 class BusinessRegister(Resource):
     def post(self):
         data = request.get_json()
+        print(request.data)
 
         if User.query.filter_by(email=data['email']).first():
             return make_response({'message': 'User with this email already exists'}, 409)
@@ -268,7 +269,8 @@ class BusinessRegister(Resource):
         email = data['email']
         password = generate_password_hash(data['password'])
         role = 'juridical_person'
-        idno = data.get('idno')
+        company_name = data['company_name']
+        company_idno = data.get('company_idno')
 
         # Create a new User object
         user = User(name=name,
@@ -283,7 +285,8 @@ class BusinessRegister(Resource):
 
         # Create a new JuridicalPerson object
         juridical_person = JuridicalPerson(user_id=user.id,
-                                           idno=idno)
+                                           company_name=company_name,
+                                           company_idno=company_idno)
 
         # Add the juridical_person to the database
         db.session.add(juridical_person)

@@ -62,4 +62,5 @@ class JuridicalPerson(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-    idno = db.Column(db.String(13), nullable=False)
+    company_name = db.Column(db.String(50),nullable=False)
+    company_idno = db.Column(db.String(13), nullable=False)
