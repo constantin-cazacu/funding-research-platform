@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { Box, Button, TextField } from '@mui/material';
+import React, { useState, useEffect } from 'react';
+import {Box, Button, TextField, Typography} from '@mui/material';
 import { useRouter } from "next/router";
 
 const LoginForm = () => {
@@ -7,6 +7,13 @@ const LoginForm = () => {
   const [password, setPassword] = useState('');
   const [token, setToken] = useState('');
   const [role, setRole] = useState('');
+  const [emailError, setEmailError] = useState(false);
+  const [submitClicked, setSubmitClicked] = useState(false);
+  const [passwordError, setPasswordError] = useState(false);
+
+
+  const isEmailValid = /\S+@\S+\.\S+/.test(email);
+
 
   const router = useRouter();
 
@@ -78,41 +85,57 @@ const LoginForm = () => {
   }, [token]);
 
   return (
-    <Box height="100vh" display="flex" justifyContent="center" alignItems="center">
       <form onSubmit={handleSubmit}>
-        <Box
-          display="flex"
-          flexDirection="column"
-          alignItems="center"
-          maxWidth={400}
-          padding={2}
-          boxShadow={1}
+        <Box sx={{
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'center',
+            alignItems: 'center',
+            height: '100vh',
+            gap: '0.1em',
+            bgcolor: '#F5F5F5',
+            padding: '20px',
+            borderRadius: '10px',
+            minWidth: 'md',
+            '& .MuiTextField-root': { m: 1, width: '32ch' }
+        }}
         >
+          <Typography variant="h6" gutterBottom>
+             Login
+          </Typography>
           <TextField
-            type="email"
-            label="Email"
-            value={email}
-            onChange={handleEmailChange}
             required
-            autoComplete="off"
-            margin="normal"
+            label="Email"
+            variant="outlined"
+            error={emailError || (submitClicked && !isEmailValid)}
+            helperText={(emailError || submitClicked) && !isEmailValid && "Invalid email address"}
+            value={email}
+            onChange={(e) => {
+            setEmail(e.target.value);
+            setEmailError(!/\S+@\S+\.\S+/.test(e.target.value));
+            }}
+            onBlur={() => setEmailError(!/\S+@\S+\.\S+/.test(email))}
           />
           <TextField
-            type="password"
-            label="Password"
-            value={password}
-            onChange={handlePasswordChange}
             required
-            minLength={8}
-            autoComplete="new-password"
-            margin="normal"
+            label="Password"
+            variant="outlined"
+            type="password"
+            error={passwordError || (submitClicked)}
+            helperText={(passwordError || submitClicked) }
+            value={password}
+            onChange={(e) => {
+                setPassword(e.target.value);
+                setPasswordError(e.target.value.length < 8);
+              }}
+            onBlur={() => setPasswordError(password.length < 8)}
           />
           <Button type="submit" variant="contained">
             Submit
           </Button>
         </Box>
       </form>
-    </Box>
+    // </Box>
   );
 };
 
