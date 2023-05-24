@@ -27,6 +27,8 @@
     "react": "latest",
     "react-chartjs-2": "^5.2.0",
     "react-dom": "latest",
+    "react-redux": "^8.0.5",
+    "redux": "^4.2.1",
     "styled-components": "^5.3.9",
     "victory": "^36.6.8"
   },
