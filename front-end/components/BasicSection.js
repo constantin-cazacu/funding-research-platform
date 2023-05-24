@@ -1,6 +1,5 @@
 import  React from 'react';
 import { Box, Typography, TextField, Checkbox, FormControlLabel } from '@mui/material';
-import budgetSection from "./BudgetSection";
 
 const fieldOfStudies = [
     'Physics',
@@ -52,7 +51,6 @@ const BasicSection = ({ handleInputChange, setFormData}) => {
     };
 
     React.useEffect(() => {
-        // console.log("Selected Fields:", selectedFields);
         handleInputChange({ projectTitle, selectedFields, abstract, budget, objectives });
     }, [projectTitle, selectedFields, abstract, budget, objectives, handleInputChange])
 
