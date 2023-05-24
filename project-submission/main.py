@@ -1,7 +1,7 @@
 from flask import Flask, request, make_response
 from flask_restful import Api, Resource, reqparse
 from flask_cors import CORS
-from models import db, ResearcherProject
+from models import db, ResearcherProject, BusinessProject
 from dotenv import load_dotenv
 import os
 from casbin import Enforcer
@@ -51,8 +51,8 @@ def handle_options():
 scheduler = BackgroundScheduler()
 
 
-# with app.app_context():
-#     db.create_all()
+with app.app_context():
+    db.create_all()
 
 
 # Define a Gauge metric for the 'up' metric
@@ -105,6 +105,37 @@ class ResearcherProjectSubmission(Resource):
                                         budget=budget_items,
                                         timeline=timeline_items,
                                         status=status)
+
+            db.session.add(project)
+            db.session.commit()
+
+            return make_response({'message': 'Project Submitted'}, 201)
+
+
+class BusinessProjectSubmission(Resource):
+    # @jwt_required
+    def put(self):
+        # access_jwt = get_jwt()
+        # user_role = access_jwt['role']
+        # if not enforcer.enforce(user_role, 'project', 'submit'):
+        #     return make_response({'message': 'Permission denied'}, 403)
+        # else:
+            data = request.get_json()
+            print(request.data)
+
+            project_title = data['projectTitle']
+            abstract = data['abstract']
+            selected_fields = data['selectedFields']
+            budget = data['budget']
+            objectives = data['objectives']
+            status = 'pending'
+
+            project = BusinessProject(title=project_title,
+                                      abstract=abstract,
+                                      fields_of_study=selected_fields,
+                                      budget=budget,
+                                      objectives=objectives,
+                                      status=status)
 
             db.session.add(project)
             db.session.commit()
@@ -174,6 +205,7 @@ class EvaluateProjects(Resource):
 
 
 api.add_resource(ResearcherProjectSubmission, "/researcher/submit_project")
+api.add_resource(BusinessProjectSubmission, "/business/submit_project")
 api.add_resource(PendingProjects, "/pending_projects")
 api.add_resource(EvaluateProjects, "/evaluate_projects")
 

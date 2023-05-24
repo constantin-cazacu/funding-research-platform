@@ -20,10 +20,14 @@ const RegisterButtons = () => {
                 </Link>
             </Button>
             <Button variant="contained" color="secondary">
-                Business
+                <Link href='/business/register'>
+                        Business
+                </Link>
             </Button>
             <Button variant="contained" color="warning">
-                Supporter
+                {/*<Link href='/supporter/register'>*/}
+                    Supporter
+                {/*</Link>*/}
             </Button>
         </Box>
     );
