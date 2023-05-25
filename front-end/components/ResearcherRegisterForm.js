@@ -18,7 +18,6 @@ function ResearcherRegisterForm() {
     const [positionClicked, setPositionClicked] = useState(false);
     const [formattedOrcid, setFormattedOrcid] = useState("");
 
-    const isPositionValid = position !== "";
 
 
     const router = useRouter();
@@ -67,7 +66,7 @@ function ResearcherRegisterForm() {
     const isEmailValid = /\S+@\S+\.\S+/.test(email);
     const isPasswordValid = password.length >= 8;
     const isOrcidValid = orcid.length === 16;
-
+    const isPositionValid = position !== "";
     const isFormValid =
         isNameValid && isSurnameValid && isEmailValid && isPasswordValid && isOrcidValid && position !== "";
 
@@ -167,10 +166,6 @@ function ResearcherRegisterForm() {
                 error={orcidError || (submitClicked && !isOrcidValid)}
                 helperText={(orcidError || submitClicked) && !isOrcidValid && "ORCID must be 16 digits long"}
                 value={formattedOrcid}
-                // onChange={(e) => {
-                // setOrcid(e.target.value);
-                // setOrcidError(e.target.value.trim().length !== 16);
-                // }}
                 onChange={(e) => {
                     const inputValue = e.target.value.replace(/[^0-9]/g, "").slice(0, 16); // Remove non-numeric characters
                     let formattedValue = inputValue;
