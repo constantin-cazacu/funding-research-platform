@@ -25,9 +25,9 @@ const RegisterButtons = () => {
                 </Link>
             </Button>
             <Button variant="contained" color="warning">
-                {/*<Link href='/supporter/register'>*/}
+                <Link href='/supporter/register'>
                     Supporter
-                {/*</Link>*/}
+                </Link>
             </Button>
         </Box>
     );
