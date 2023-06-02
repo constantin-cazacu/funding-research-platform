@@ -204,10 +204,32 @@ class EvaluateProjects(Resource):
             return make_response({"message": f"Project {args['id']} has been unchanged"}, 200)
 
 
+class ProjectData(Resource):
+    def __init__(self):
+        self.parser = reqparse.RequestParser()
+        self.parser.add_argument('id', type=int, location='args', default=None)
+
+    def get(self):
+        args = self.parser.parse_args()
+        print("id:", args["id"])
+        project = ResearcherProject.query.filter_by(id=args['id']).first()
+        print("here:", project)
+        project_data = {
+            'id': project.id,
+            'title': project.title,
+            'abstract': project.abstract,
+            'fields_of_study': project.fields_of_study,
+            'budget': project.budget,
+            'timeline': project.timeline,
+        }
+        return make_response({"data": project_data}, 200)
+
+
 api.add_resource(ResearcherProjectSubmission, "/researcher/submit_project")
 api.add_resource(BusinessProjectSubmission, "/business/submit_project")
 api.add_resource(PendingProjects, "/pending_projects")
 api.add_resource(EvaluateProjects, "/evaluate_projects")
+api.add_resource(ProjectData, "/project_data")
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)
