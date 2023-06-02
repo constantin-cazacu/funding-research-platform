@@ -1,4 +1,4 @@
-import ProjectSubmissionEntries from "../components/ProjectSubmissionEntries";
+import ProjectSubmissionEntries from "../../components/ProjectSubmissionEntries";
 
 function AdminPanel() {
     return (

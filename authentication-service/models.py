@@ -1,8 +1,11 @@
 from flask_sqlalchemy import SQLAlchemy
 from enum import Enum
 from datetime import datetime
+from werkzeug.security import generate_password_hash
+# from main import app, initialize_database
 
 db = SQLAlchemy()
+# initialize_database(app)
 
 
 class TokenBlacklist(db.Model):
@@ -62,4 +65,20 @@ class JuridicalPerson(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-    idno = db.Column(db.String(13), nullable=False)
+    company_name = db.Column(db.String(50),nullable=False)
+    company_idno = db.Column(db.String(13), nullable=False)
+
+
+class AdminUser(db.Model):
+    __tablename__ = 'admin_users'
+
+    id = db.Column(db.Integer, primary_key=True)
+    email = db.Column(db.String(255), unique=True, nullable=False)
+    password = db.Column(db.String(255), nullable=False)
+    role = db.Column(db.String(6), nullable=False)
+    # refresh_token = db.Column(db.String(800))
+
+    # def __init__(self, email, password):
+    #     self.email = email
+    #     self.password = password
+

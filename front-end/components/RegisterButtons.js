@@ -1,6 +1,6 @@
 import React from "react";
 import Link from "next/link"
-import { Box, Button } from "@mui/material";
+import {Box, Button, Typography} from "@mui/material";
 
 const RegisterButtons = () => {
     return (
@@ -14,16 +14,23 @@ const RegisterButtons = () => {
                 gap: "1em"
             }}
         >
+            <Typography variant="h6" gutterBottom>
+                Choose Your User Type
+            </Typography>
             <Button variant="contained" color="primary">
                 <Link href='/researcher/register'>
                         Researcher
                 </Link>
             </Button>
             <Button variant="contained" color="secondary">
-                Business
+                <Link href='/business/register'>
+                        Business
+                </Link>
             </Button>
             <Button variant="contained" color="warning">
-                Supporter
+                <Link href='/supporter/register'>
+                    Supporter
+                </Link>
             </Button>
         </Box>
     );

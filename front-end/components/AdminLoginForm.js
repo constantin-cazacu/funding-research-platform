@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import {Box, Button, TextField, Typography} from '@mui/material';
 import { useRouter } from "next/router";
 
-const LoginForm = () => {
+const AdminLoginForm = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [token, setToken] = useState('');
@@ -26,7 +26,9 @@ const LoginForm = () => {
   };
 
   const handleSubmit = (e) => {
-    e.preventDefault();
+      console.log("payload:", email, password )
+      e.preventDefault();
+      console.log("payload:", email, password )
 
     // Validate email and password
     if (email === '' || password === '') {
@@ -41,7 +43,7 @@ const LoginForm = () => {
 
     // Send data to login API
     // Replace 'api/login' with the actual endpoint URL
-    fetch('http://localhost:5001/login', {
+    fetch('http://localhost:5001/admin/login', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -51,7 +53,8 @@ const LoginForm = () => {
       .then((response) => {
         // Check if the response was successful
         if (!response.ok) {
-          throw new Error('Login failed');
+            console.log("payload:", email, password )
+            throw new Error('Login failed');
         }
         console.log(response.headers)
         // Extract the JWT token from the response
@@ -69,7 +72,7 @@ const LoginForm = () => {
         // Handle the API response here
         console.log(data);
         // Redirect to another page after successful login
-        router.push('/submit'); // Replace '/dashboard' with the desired page URL
+        router.push('/admin/admin_panel'); // Replace '/dashboard' with the desired page URL
       })
       .catch((error) => {
         console.error(error);
@@ -111,8 +114,8 @@ const LoginForm = () => {
             helperText={(emailError || submitClicked) && !isEmailValid && "Invalid email address"}
             value={email}
             onChange={(e) => {
-            setEmail(e.target.value);
-            setEmailError(!/\S+@\S+\.\S+/.test(e.target.value));
+                setEmail(e.target.value);
+                setEmailError(!/\S+@\S+\.\S+/.test(e.target.value));
             }}
             onBlur={() => setEmailError(!/\S+@\S+\.\S+/.test(email))}
           />
@@ -122,7 +125,7 @@ const LoginForm = () => {
             variant="outlined"
             type="password"
             error={passwordError || (submitClicked)}
-            helperText={(passwordError || submitClicked) }
+            helperText={(passwordError || submitClicked) && 'Invalid password' }
             value={password}
             onChange={(e) => {
                 setPassword(e.target.value);
@@ -135,8 +138,7 @@ const LoginForm = () => {
           </Button>
         </Box>
       </form>
-    // </Box>
   );
 };
 
-export default LoginForm;
+export default AdminLoginForm;

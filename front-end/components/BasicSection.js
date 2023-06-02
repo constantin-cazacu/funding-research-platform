@@ -1,4 +1,4 @@
-import React from 'react';
+import  React from 'react';
 import { Box, Typography, TextField, Checkbox, FormControlLabel } from '@mui/material';
 
 const fieldOfStudies = [
@@ -23,6 +23,8 @@ const BasicSection = ({ handleInputChange, setFormData}) => {
     const [projectTitle, setProjectTitle] = React.useState('');
     const [selectedFields, setSelectedFields] = React.useState([]);
     const [abstract, setAbstract] = React.useState('');
+    const [budget, setBudget] = React.useState('');
+    const [objectives, setObjectives] = React.useState('');
 
     const handleFieldSelectionChange = (event) => {
         const { checked, name } = event.target ?? {};
@@ -49,9 +51,8 @@ const BasicSection = ({ handleInputChange, setFormData}) => {
     };
 
     React.useEffect(() => {
-        // console.log("Selected Fields:", selectedFields);
-        handleInputChange({ projectTitle, selectedFields, abstract });
-    }, [projectTitle, selectedFields, abstract, handleInputChange])
+        handleInputChange({ projectTitle, selectedFields, abstract, budget, objectives });
+    }, [projectTitle, selectedFields, abstract, budget, objectives, handleInputChange])
 
     return (
         <Box sx={{ maxWidth: 600, mx: 'auto' }}>
@@ -100,7 +101,36 @@ const BasicSection = ({ handleInputChange, setFormData}) => {
                     inputProps={{ maxLength: 2000 }}
                     name="abstract"
                 />
+
+                <TextField
+                    label="Budget"
+                    value={budget}
+                    onChange={(event) => {
+                        setBudget(event.target.value);
+                        handleInputChange(event);
+                    }}
+                    variant="outlined"
+                    // multiline
+                    // maxRows={10}
+                    inputProps={{ maxLength: 50}}
+                    name="budget"
+                />
+
+                <TextField
+                    label="Project Objectives"
+                    value={objectives}
+                    onChange={(event) => {
+                        setObjectives(event.target.value);
+                        handleInputChange(event);
+                    }}
+                    variant="outlined"
+                    multiline
+                    maxRows={50}
+                    inputProps={{ maxLength: 2000}}
+                    name="objectives"
+                />
             </Box>
+
         </Box>
     );
 };

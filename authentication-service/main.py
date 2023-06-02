@@ -4,7 +4,7 @@ from flask_restful import Api, Resource
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager, jwt_required, get_jwt_identity, create_access_token, create_refresh_token, get_jwt, verify_jwt_in_request, get_jti, decode_token
 from werkzeug.security import generate_password_hash, check_password_hash
-from models import db, User, Researcher, JuridicalPerson, TokenBlacklist
+from models import db, User, Researcher, JuridicalPerson, TokenBlacklist, AdminUser
 from dotenv import load_dotenv
 import os
 from datetime import timedelta
@@ -42,7 +42,33 @@ app.wsgi_app = DispatcherMiddleware(app.wsgi_app, {
 })
 
 
-# Create the database tables
+def create_predefined_admin_users():
+    predefined_admin_users = [
+        # {'name': 'Ana', 'surname': 'S', 'email': 'sarapova.ana@isa.utm.md', 'password': '123456789'},
+        # {'name': 'Lilo', 'surname': 'Stich', 'email': 'sarapovaaniuta@gmail.com', 'password': '123456789'},
+
+        {'email': 'sarapova.ana@isa.utm.md', 'password': '123456789', 'role': 'admin'},
+        {'email': 'sarapovaaniuta@gmail.com', 'password': '123456789', 'role': 'admin'},
+        # Add more predefined admin users as needed
+    ]
+    with app.app_context():
+        for admin_user in predefined_admin_users:
+            email = admin_user['email']
+            password = admin_user['password']
+            role = admin_user['role']
+
+            existing_admin_user = AdminUser.query.filter_by(email=email).first()
+            if existing_admin_user:
+                continue
+
+            hashed_password = generate_password_hash(password)
+            admin_user = AdminUser(email=email, password=hashed_password, role=role)
+            with app.app_context():
+                db.session.add(admin_user)
+                db.session.commit()
+
+
+# # Create the database tables
 # with app.app_context():
 #     db.create_all()
 
@@ -259,6 +285,7 @@ class ResearcherRegister(Resource):
 class BusinessRegister(Resource):
     def post(self):
         data = request.get_json()
+        print(request.data)
 
         if User.query.filter_by(email=data['email']).first():
             return make_response({'message': 'User with this email already exists'}, 409)
@@ -268,7 +295,8 @@ class BusinessRegister(Resource):
         email = data['email']
         password = generate_password_hash(data['password'])
         role = 'juridical_person'
-        idno = data.get('idno')
+        company_name = data['company_name']
+        company_idno = data.get('company_idno')
 
         # Create a new User object
         user = User(name=name,
@@ -283,7 +311,8 @@ class BusinessRegister(Resource):
 
         # Create a new JuridicalPerson object
         juridical_person = JuridicalPerson(user_id=user.id,
-                                           idno=idno)
+                                           company_name=company_name,
+                                           company_idno=company_idno)
 
         # Add the juridical_person to the database
         db.session.add(juridical_person)
@@ -360,6 +389,37 @@ class Login(Resource):
         return make_response({'message': 'Login successful'}, 200, headers)
 
 
+
+class AdminLogin(Resource):
+    def post(self):
+        data = request.get_json()
+
+        # Find the user in the database based on their email
+        user = AdminUser.query.filter_by(email=data['email']).first()
+
+        # If the user doesn't exist or the password is incorrect, return an error
+        if not user or not check_password_hash(user.password, data['password']):
+            return make_response({'message': 'Invalid credentials'}, 401)
+
+        access_token = create_access_token(identity=data['email'],
+                                           expires_delta=app.config['JWT_ACCESS_TOKEN_EXPIRES'],
+                                           additional_claims={'role': user.role})
+
+        refresh_token = create_refresh_token(identity=data['email'],
+                                             expires_delta=app.config['JWT_REFRESH_TOKEN_EXPIRES'],
+                                             additional_claims={'role': user.role})
+
+        # update user's refresh token value in the database
+        user.refresh_token = refresh_token
+        db.session.commit()
+
+        headers = {'Authorization': f'Bearer {access_token}', 'Role': f'{user.role}',
+                   'Access-Control-Expose-Headers': 'Authorization, Role',
+                   'Access-Control-Allow-Headers': 'Authorization'}
+
+        return make_response({'message': 'Login successful'}, 200, headers)
+
+
 class Logout(Resource):
     @is_token_revoked
     @jwt_required()
@@ -409,6 +469,7 @@ class RetrieveRole(Resource):
 api.add_resource(ResearcherRegister, "/researcher/register")
 api.add_resource(BusinessRegister, "/business/register")
 api.add_resource(SupporterRegister, "/supporter/register")
+api.add_resource(AdminLogin, "/admin/login")
 api.add_resource(Login, "/login")
 api.add_resource(Logout, "/logout")
 api.add_resource(RefreshAccessToken, "/refresh")
@@ -417,6 +478,7 @@ api.add_resource(RetrieveRole, "/retrieve_role")
 
 
 if __name__ == '__main__':
+    create_predefined_admin_users()
     scheduler = BackgroundScheduler()
     # update the application status every 10 seconds
     scheduler.add_job(update_up_metric, 'interval', seconds=10)

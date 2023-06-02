@@ -2,24 +2,20 @@ import React, { useState } from "react";
 import { useRouter } from "next/router";
 import {Box, TextField, Button, MenuItem, Typography} from "@mui/material";
 
-function ResearcherRegisterForm() {
+function BusinessRegisterForm() {
     const [name, setName] = useState("");
     const [surname, setSurname] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
-    const [orcid, setOrcid] = useState("");
-    const [position, setPosition] = useState("");
-    const [submitClicked, setSubmitClicked] = useState(false);
+    const [company_name, setCompanyName] = useState("");
+    const [company_idno, setCompanyIDNO] = useState("");    const [submitClicked, setSubmitClicked] = useState(false);
     const [emailError, setEmailError] = useState(false);
     const [passwordError, setPasswordError] = useState(false);
     const [nameError, setNameError] = useState(false);
+    const [companyNameError, setCompanyNameError] = useState(false);
+    const [companyIDNOError, setCompanyIDNOError] = useState(false);
+    const [formattedIDNO, setFormattedIDNO] = useState("");
     const [surnameError, setSurnameError] = useState(false);
-    const [orcidError, setOrcidError] = useState(false);
-    const [positionClicked, setPositionClicked] = useState(false);
-    const [formattedOrcid, setFormattedOrcid] = useState("");
-
-
-
     const router = useRouter();
 
     async function postData(url = '', data = {}) {
@@ -36,21 +32,20 @@ function ResearcherRegisterForm() {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-          setSubmitClicked(true);
         // Do something with the form data
         const formData = {
             name: name,
             surname: surname,
             email: email,
             password: password,
-            orcid: orcid,
-            position: position
+            company_name: company_name,
+            company_idno: company_idno
         };
 
         const jsonFormData = JSON.stringify(formData);
 
         // send the jsonFormData to the API using the fetch() method
-        const url = 'http://localhost:5001/researcher/register';
+        const url = 'http://localhost:5001/business/register';
         postData(url, jsonFormData)
             .then(jsonFormData => {
                 console.log(jsonFormData); // JSON data from response
@@ -65,10 +60,11 @@ function ResearcherRegisterForm() {
     const isSurnameValid = surname !== "";
     const isEmailValid = /\S+@\S+\.\S+/.test(email);
     const isPasswordValid = password.length >= 8;
-    const isOrcidValid = orcid.length === 16;
-    const isPositionValid = position !== "";
+    const isCompanyNameValid = company_name !== ""
+    const isCompanyIDNOValid = company_idno.length === 13;
+
     const isFormValid =
-        isNameValid && isSurnameValid && isEmailValid && isPasswordValid && isOrcidValid && position !== "";
+        isNameValid && isSurnameValid && isEmailValid && isPasswordValid && isCompanyNameValid && isCompanyIDNOValid !== "";
 
     return (
         <Box sx={{
@@ -86,7 +82,7 @@ function ResearcherRegisterForm() {
         }}
         >
             <Typography variant="h6" gutterBottom>
-                Researcher Registration
+                Juridical User Registration
             </Typography>
             <TextField
                 required
@@ -161,46 +157,47 @@ function ResearcherRegisterForm() {
             />
             <TextField
                 required
-                label="ORCID"
+                label="Company name"
                 variant="outlined"
-                error={orcidError || (submitClicked && !isOrcidValid)}
-                helperText={(orcidError || submitClicked) && !isOrcidValid && "ORCID must be 16 digits long"}
-                value={formattedOrcid}
+                error={companyNameError || (submitClicked && !isCompanyNameValid)}
+                helperText={(companyNameError || submitClicked) && !isCompanyNameValid && "Company name is required"}
+                value={company_name}
                 onChange={(e) => {
-                    const inputValue = e.target.value.replace(/[^0-9]/g, "").slice(0, 16); // Remove non-numeric characters
-                    let formattedValue = inputValue;
-
-                    if (inputValue.length > 4) {
-                      formattedValue = inputValue.match(/.{1,4}/g).join("-"); // Add a dash after every 4th digit
-                    }
-
-                    setOrcid(inputValue);
-                    setFormattedOrcid(formattedValue);
+                  setCompanyName(e.target.value);
+                  setCompanyNameError(e.target.value.trim().length === 0);
                 }}
-                onBlur={() => setOrcidError(orcid.trim().length !== 16)}
+                onBlur={() => setCompanyNameError(company_name.trim().length === 0)}
                 InputProps={{
-                placeholder: "Enter your ORCID"
+                  placeholder: "Enter the company name"
                 }}
                 sx={{
-                ...(orcidError && { borderColor: 'red' }) // Apply red border color when there is an error
+                  ...(companyNameError && { borderColor: 'red' }) // Apply red border color when there is an error
                 }}
             />
             <TextField
                 required
-                label="Position"
-                select
+                label="Company IDNO"
                 variant="outlined"
-                error={!isPositionValid && positionClicked}
-                helperText={!isPositionValid && positionClicked && "Position is required"}
-                value={position}
-                onBlur={() => setPositionClicked(true)}
+                error={companyIDNOError || (submitClicked && !isCompanyIDNOValid)}
+                helperText={(companyIDNOError || submitClicked) && !isCompanyIDNOValid && "IDNO must be 13 digits long"}
+                value={formattedIDNO}
                 onChange={(e) => {
-                setPosition(e.target.value);
-                setPositionClicked(false);
+                    const inputValue = e.target.value.replace(/[^0-9]/g, "").slice(0, 13); // Remove non-numeric characters
+                    let formattedValue = inputValue;
+
+
+                    setCompanyIDNO(inputValue);
+                    setFormattedIDNO(formattedValue);
                 }}
+                onBlur={() => setCompanyIDNOError(company_idno.trim().length !== 13)}
+                InputProps={{
+                placeholder: "Enter company's IDNO"
+                }}
+                sx={{
+                ...(companyIDNOError && { borderColor: 'red' }) // Apply red border color when there is an error
+                }}
+
             >
-                <MenuItem value="student">Student</MenuItem>
-                <MenuItem value="supervisor">Supervisor</MenuItem>
             </TextField>
             <Button
                 variant="contained"
@@ -213,4 +210,4 @@ function ResearcherRegisterForm() {
     );
 }
 
-export default ResearcherRegisterForm;
+export default BusinessRegisterForm;
