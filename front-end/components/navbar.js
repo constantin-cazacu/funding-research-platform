@@ -25,20 +25,24 @@ const Navbar = () => {
 
   return (
     <Box display="flex" justifyContent="space-between" alignItems="center" padding={2}>
-      {loggedIn && (role === 'researcher' || role === 'juridical_person') && (
-        <Button variant="contained" onClick={handleSubmitProjectClick}>
-          Submit Project
-        </Button>
-      )}
-      {loggedIn ? (
-        <Button variant="contained" onClick={handleLogoutClick}>
-          Logout
-        </Button>
-      ) : (
-        <Button variant="contained" onClick={handleLoginClick}>
-          Login
-        </Button>
-      )}
+      <Box>
+        {loggedIn && (role === 'researcher' || role === 'juridical_person') && (
+          <Button variant="contained" onClick={handleSubmitProjectClick}>
+            Submit Project
+          </Button>
+        )}
+      </Box>
+      <Box>
+        {loggedIn ? (
+          <Button variant="contained" onClick={handleLogoutClick}>
+            Logout
+          </Button>
+        ) : (
+          <Button variant="contained" onClick={handleLoginClick}>
+            Login
+          </Button>
+        )}
+      </Box>
     </Box>
   );
 };
