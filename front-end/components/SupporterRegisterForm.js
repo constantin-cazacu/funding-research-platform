@@ -14,11 +14,6 @@ function ResearcherRegisterForm() {
     const [passwordError, setPasswordError] = useState(false);
     const [nameError, setNameError] = useState(false);
     const [surnameError, setSurnameError] = useState(false);
-    const [orcidError, setOrcidError] = useState(false);
-    const [positionClicked, setPositionClicked] = useState(false);
-    const [formattedOrcid, setFormattedOrcid] = useState("");
-
-
 
     const router = useRouter();
 
@@ -43,14 +38,12 @@ function ResearcherRegisterForm() {
             surname: surname,
             email: email,
             password: password,
-            orcid: orcid,
-            position: position
         };
 
         const jsonFormData = JSON.stringify(formData);
 
         // send the jsonFormData to the API using the fetch() method
-        const url = 'http://localhost:5001/researcher/register';
+        const url = 'http://localhost:5001/supporter/register';
         postData(url, jsonFormData)
             .then(jsonFormData => {
                 console.log(jsonFormData); // JSON data from response
@@ -65,10 +58,8 @@ function ResearcherRegisterForm() {
     const isSurnameValid = surname !== "";
     const isEmailValid = /\S+@\S+\.\S+/.test(email);
     const isPasswordValid = password.length >= 8;
-    const isOrcidValid = orcid.length === 16;
-    const isPositionValid = position !== "";
     const isFormValid =
-        isNameValid && isSurnameValid && isEmailValid && isPasswordValid && isOrcidValid && position !== "";
+        isNameValid && isSurnameValid && isEmailValid && isPasswordValid !== "";
 
     return (
         <Box sx={{
@@ -86,7 +77,7 @@ function ResearcherRegisterForm() {
         }}
         >
             <Typography variant="h6" gutterBottom>
-                Researcher Registration
+                Supporter Registration
             </Typography>
             <TextField
                 required
@@ -159,49 +150,8 @@ function ResearcherRegisterForm() {
                 placeholder: "Enter your password"
                 }}
             />
-            <TextField
-                required
-                label="ORCID"
-                variant="outlined"
-                error={orcidError || (submitClicked && !isOrcidValid)}
-                helperText={(orcidError || submitClicked) && !isOrcidValid && "ORCID must be 16 digits long"}
-                value={formattedOrcid}
-                onChange={(e) => {
-                    const inputValue = e.target.value.replace(/[^0-9]/g, "").slice(0, 16); // Remove non-numeric characters
-                    let formattedValue = inputValue;
 
-                    if (inputValue.length > 4) {
-                      formattedValue = inputValue.match(/.{1,4}/g).join("-"); // Add a dash after every 4th digit
-                    }
 
-                    setOrcid(inputValue);
-                    setFormattedOrcid(formattedValue);
-                }}
-                onBlur={() => setOrcidError(orcid.trim().length !== 16)}
-                InputProps={{
-                placeholder: "Enter your ORCID"
-                }}
-                sx={{
-                ...(orcidError && { borderColor: 'red' }) // Apply red border color when there is an error
-                }}
-            />
-            <TextField
-                required
-                label="Position"
-                select
-                variant="outlined"
-                error={!isPositionValid && positionClicked}
-                helperText={!isPositionValid && positionClicked && "Position is required"}
-                value={position}
-                onBlur={() => setPositionClicked(true)}
-                onChange={(e) => {
-                setPosition(e.target.value);
-                setPositionClicked(false);
-                }}
-            >
-                <MenuItem value="student">Student</MenuItem>
-                <MenuItem value="supervisor">Supervisor</MenuItem>
-            </TextField>
             <Button
                 variant="contained"
                 disabled={!isFormValid}
