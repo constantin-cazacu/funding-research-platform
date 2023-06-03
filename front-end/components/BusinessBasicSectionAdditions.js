@@ -44,7 +44,6 @@ const BusinessBasicSectionAdditions = ({ handleInputChange, setFormData}) => {
                     name="objectives"
                 />
             </Box>
-
         </Box>
     );
 };

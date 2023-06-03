@@ -1,9 +1,9 @@
 import { useState } from "react";
-import BasicSection from "../components/BasicSection";
+import BasicSection from "../../components/BasicSection";
 import {Box, Button} from "@mui/material";
-import BusinessBasicSectionAdditions from "../components/BusinessBasicSectionAdditions";
+import BusinessBasicSectionAdditions from "../../components/BusinessBasicSectionAdditions";
 
-function BusinessProjectSubmit() {
+function ProjectSubmit() {
     const [formData, setFormData] = useState({
         projectTitle: '',
         selectedFields: [],
@@ -81,4 +81,5 @@ function BusinessProjectSubmit() {
     );
 }
 
-export default BusinessProjectSubmit
+export default ProjectSubmit
+

@@ -68,23 +68,26 @@ const LoginForm = () => {
       const data = await response.json();
       // Handle the API response here
       console.log('data:', data);
+      console.log('Role:', role);
+
 
       // Redirect to different pages based on the user type
       if (role === 'researcher') {
-        router.push('/submit');
-      } else if (role === 'business') {
-        router.push('/business_submit');
+          await router.push('/researcher/project_submit');
+      } else if (role === 'juridical_person') {
+          console.log("I was here")
+          await router.push('/business/project_submit');
       } else if (role === 'supporter') {
-        router.push('/supporter_page');  //!!!Modify here the url
+          await router.push('/supporter_page');  //!!!Modify here the url
       } else {
         // Redirect to a default page if the user type is unknown or not handled
-        router.push('/default_page');
+          await router.push('/');
       }
     } catch (error) {
       console.error(error);
     }
     })();
-    };
+  };
 
   useEffect(() => {
     // This effect runs when the token state changes
@@ -145,7 +148,6 @@ const LoginForm = () => {
           </Button>
         </Box>
       </form>
-    // </Box>
   );
 };
 
