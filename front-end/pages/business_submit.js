@@ -1,6 +1,7 @@
 import { useState } from "react";
 import BasicSection from "../components/BasicSection";
 import {Box, Button} from "@mui/material";
+import BusinessBasicSectionAdditions from "../components/BusinessBasicSectionAdditions";
 
 function BusinessProjectSubmit() {
     const [formData, setFormData] = useState({
@@ -59,6 +60,10 @@ function BusinessProjectSubmit() {
                     handleInputChange={handleInputChange}
                     setFormData={setFormData}>
                 </BasicSection>
+                <BusinessBasicSectionAdditions
+                    handleInputChange={handleInputChange}
+                    setFormData={setFormData}>
+                </BusinessBasicSectionAdditions>
                 <Box sx={{
                     display: "flex",
                     flexDirection: "column",

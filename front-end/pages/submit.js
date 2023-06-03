@@ -4,7 +4,7 @@ import BudgetSection from "../components/BudgetSection";
 import TimelineSection from "../components/TimelineSection";
 import {Box, Button} from "@mui/material";
 
-function ResearcherProjectSubmit() {
+function ProjectSubmit() {
     const [formData, setFormData] = useState({
         projectTitle: '',
         selectedFields: [],
@@ -136,4 +136,4 @@ function ResearcherProjectSubmit() {
     )
 }
 
-export default ResearcherProjectSubmit
+export default ProjectSubmit

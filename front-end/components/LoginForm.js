@@ -39,42 +39,52 @@ const LoginForm = () => {
       return;
     }
 
-    // Send data to login API
-    // Replace 'api/login' with the actual endpoint URL
-    fetch('http://localhost:5001/login', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ email, password }),
-    })
-      .then((response) => {
-        // Check if the response was successful
-        if (!response.ok) {
-          throw new Error('Login failed');
-        }
-        console.log(response.headers)
-        // Extract the JWT token from the response
-        const token = response.headers.get('Authorization');
-        // Extract the custom Role header from the response
-        const role = response.headers.get('Role');
-
-        // Store the token and role in the component's state
-        setToken(token);
-        setRole(role);
-
-        return response.json();
-      })
-      .then((data) => {
-        // Handle the API response here
-        console.log(data);
-        // Redirect to another page after successful login
-        router.push('/submit'); // Replace '/dashboard' with the desired page URL
-      })
-      .catch((error) => {
-        console.error(error);
+    (async () => {
+    try {
+      // Send data to login API
+      // Replace 'api/login' with the actual endpoint URL
+      const response = await fetch('http://localhost:5001/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
       });
-  };
+
+      // Check if the response was successful
+      if (!response.ok) {
+        throw new Error('Login failed');
+      }
+
+      // Extract the JWT token from the response
+      const token = response.headers.get('Authorization');
+      // Extract the custom Role header from the response
+      const role = response.headers.get('Role');
+
+      // Store the token and role in the component's state
+      setToken(token);
+      setRole(role);
+
+      const data = await response.json();
+      // Handle the API response here
+      console.log('data:', data);
+
+      // Redirect to different pages based on the user type
+      if (role === 'researcher') {
+        router.push('/submit');
+      } else if (role === 'business') {
+        router.push('/business_submit');
+      } else if (role === 'supporter') {
+        router.push('/supporter_page');  //!!!Modify here the url
+      } else {
+        // Redirect to a default page if the user type is unknown or not handled
+        router.push('/default_page');
+      }
+    } catch (error) {
+      console.error(error);
+    }
+    })();
+    };
 
   useEffect(() => {
     // This effect runs when the token state changes
