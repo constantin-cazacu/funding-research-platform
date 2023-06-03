@@ -1,10 +1,10 @@
 import { useState } from "react";
-import BasicSection from "../components/BasicSection";
-import BudgetSection from "../components/BudgetSection";
-import TimelineSection from "../components/TimelineSection";
+import BasicSection from "../../components/BasicSection";
+import BudgetSection from "../../components/BudgetSection";
+import TimelineSection from "../../components/TimelineSection";
 import {Box, Button} from "@mui/material";
 
-function ResearcherProjectSubmit() {
+function ProjectSubmit() {
     const [formData, setFormData] = useState({
         projectTitle: '',
         selectedFields: [],
@@ -34,6 +34,7 @@ function ResearcherProjectSubmit() {
         })
             .then(response => {
                 console.log(response);
+                // console.log('Role:', role);
                 // Handle response from the API
             })
             .catch(error => {
@@ -136,4 +137,4 @@ function ResearcherProjectSubmit() {
     )
 }
 
-export default ResearcherProjectSubmit
+export default ProjectSubmit
