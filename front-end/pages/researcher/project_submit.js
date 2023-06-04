@@ -3,12 +3,16 @@ import BasicSection from "../../components/BasicSection";
 import BudgetSection from "../../components/BudgetSection";
 import TimelineSection from "../../components/TimelineSection";
 import {Box, Button} from "@mui/material";
+import AdditionalResearcherProjectSubmissionComponents
+    from "../../components/AdditionalResearcherProjectSubmissionComponents";
 
 function ProjectSubmit() {
     const [formData, setFormData] = useState({
         projectTitle: '',
         selectedFields: [],
         abstract: '',
+        fundingGoal: '',
+        coordinatorName: '',
         budgetItems: {},
         timelineItems: []
     });
@@ -112,6 +116,11 @@ function ProjectSubmit() {
                     handleFieldSelectionChange={handleFieldSelectionChange}
                     setFormData={setFormData}>
                 </BasicSection>
+                <AdditionalResearcherProjectSubmissionComponents
+                    handleInputChange={handleInputChange}
+                    handleFieldSelectionChange={handleFieldSelectionChange}
+                    setFormData={setFormData}>
+                </AdditionalResearcherProjectSubmissionComponents>
                 <BudgetSection handleInputChange={handleInputChange}
                                handleBudgetChange={handleBudgetChange}
                                formData={formData}

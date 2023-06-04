@@ -95,6 +95,8 @@ class ResearcherProjectSubmission(Resource):
             project_title = data['projectTitle']
             selected_fields = data['selectedFields']
             abstract = data['abstract']
+            funding_goal = data['fundingGoal']
+            coordinator_name = data['coordinatorName']
             budget_items = data['budgetItems']
             timeline_items = data['timelineItems']
             status = 'pending'
@@ -102,6 +104,8 @@ class ResearcherProjectSubmission(Resource):
             project = ResearcherProject(title=project_title,
                                         abstract=abstract,
                                         fields_of_study=selected_fields,
+                                        funding_goal=funding_goal,
+                                        coordinator_name=coordinator_name,
                                         budget=budget_items,
                                         timeline=timeline_items,
                                         status=status)

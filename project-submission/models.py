@@ -11,6 +11,8 @@ class ResearcherProject(db.Model):
     title = db.Column(db.String(600))
     abstract = db.Column(db.String(2000))
     fields_of_study = db.Column(db.JSON)
+    funding_goal = db.Column(db.String(2000))
+    coordinator_name = db.Column(db.String(2000))
     budget = db.Column(db.JSON)
     timeline = db.Column(db.JSON)
     status = db.Column(db.Enum('accepted', 'rejected', 'pending', name='status'))
@@ -20,6 +22,8 @@ class ResearcherProject(db.Model):
                f"title='{self.title}', " \
                f"abstract='{self.abstract}', " \
                f"fields_of_study='{self.fields_of_study}', " \
+               f"funding_goal='{self.funding_goal}', " \
+               f"coordinator_name='{self.coordinator_name}', " \
                f"budget='{self.budget}', " \
                f"timeline='{self.timeline}', " \
                f"status='{self.status}')>"
