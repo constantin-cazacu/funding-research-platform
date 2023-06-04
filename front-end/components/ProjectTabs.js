@@ -21,7 +21,8 @@ const ProjectTabs = ({ abstract, budget_items, timeline_items }) => {
         <VictoryPie
           data={data}
           innerRadius={100}
-          colorScale={['#FF6384', '#36A2EB', '#FFCE56']} // Customize the colors as needed
+          // colorScale={['#FF6384', '#36A2EB', '#FFCE56']} // Customize the colors as needed
+          colorScale="qualitative" // Customize the colors as needed
         />
       </Box>
     );
