@@ -48,6 +48,7 @@ class BusinessProject(db.Model):
     abstract = db.Column(db.String(2000))
     fields_of_study = db.Column(db.JSON)
     offered_funds = db.Column(db.String(50))
+    currency = db.Column(db.String(9))
     objectives = db.Column(db.JSON)
     email = db.Column(db.String(120), unique=True, nullable=False)
     status = db.Column(db.Enum('accepted', 'rejected', 'pending', name='status'))
@@ -58,6 +59,7 @@ class BusinessProject(db.Model):
                f"abstract='{self.abstract}', " \
                f"fields_of_study='{self.fields_of_study}', " \
                f"offered_funds='{self.offered_funds}', " \
+               f"currency='{self.currency}', " \
                f"objectives='{self.objectives}', " \
                f"email='{self.email}', " \
                f"status='{self.status}')>"

@@ -164,6 +164,7 @@ class BusinessProjectSubmission(Resource):
             abstract = data['abstract']
             selected_fields = data['selectedFields']
             offered_funds = data['offeredFunds']
+            currency = data['currency']
             objectives = data['objectives']
             email = data['email']
             status = 'pending'
@@ -172,6 +173,7 @@ class BusinessProjectSubmission(Resource):
                                       abstract=abstract,
                                       fields_of_study=selected_fields,
                                       offered_funds=offered_funds,
+                                      currency=currency,
                                       objectives=objectives,
                                       email=email,
                                       status=status)
@@ -288,6 +290,7 @@ class BusinessProjectData(Resource):
             'abstract': project.abstract,
             'fields_of_study': project.fields_of_study,
             'offered_funds': project.offered_funds,
+            'currency': project.currency,
             'objectives': project.objectives,
             'owner': owner,
             'company_name': company_name,
