@@ -90,11 +90,16 @@ class ResearcherProjectSubmission(Resource):
         #     return make_response({'message': 'Permission denied'}, 403)
         # else:
             data = request.get_json()
-            print(request.data)
+            print("requested data: ", request.data)
+            print("data: ", data)
 
             project_title = data['projectTitle']
             selected_fields = data['selectedFields']
             abstract = data['abstract']
+            funding_goal = data['fundingGoal']
+            currency = data['currency']
+            student_email = data['studentEmail']
+            supervisor_email = data['supervisorEmail']
             budget_items = data['budgetItems']
             timeline_items = data['timelineItems']
             status = 'pending'
@@ -102,6 +107,10 @@ class ResearcherProjectSubmission(Resource):
             project = ResearcherProject(title=project_title,
                                         abstract=abstract,
                                         fields_of_study=selected_fields,
+                                        funding_goal=funding_goal,
+                                        currency=currency,
+                                        student_email=student_email,
+                                        supervisor_email=supervisor_email,
                                         budget=budget_items,
                                         timeline=timeline_items,
                                         status=status)
