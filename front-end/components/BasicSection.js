@@ -59,6 +59,7 @@ const BasicSection = ({ handleInputChange, setFormData}) => {
             </Typography>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                 <TextField
+                    required
                     label="Project Title"
                     value={projectTitle}
                     onChange={(event) => {
@@ -87,6 +88,7 @@ const BasicSection = ({ handleInputChange, setFormData}) => {
                     ))}
                 </Box>
                 <TextField
+                    required
                     label="Abstract"
                     value={abstract}
                     onChange={(event) => {
@@ -99,6 +101,8 @@ const BasicSection = ({ handleInputChange, setFormData}) => {
                     inputProps={{ maxLength: 2000 }}
                     name="abstract"
                 />
+                <Typography></Typography>
+
             </Box>
         </Box>
     );

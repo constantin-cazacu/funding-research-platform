@@ -5,6 +5,7 @@ import TimelineSection from "../../components/TimelineSection";
 import {Box, Button} from "@mui/material";
 import AdditionalResearcherProjectSubmissionComponents
     from "../../components/AdditionalResearcherProjectSubmissionComponents";
+import FundingGoal from "../../components/FundingGoal";
 
 function ProjectSubmit() {
     const [formData, setFormData] = useState({
@@ -12,7 +13,8 @@ function ProjectSubmit() {
         selectedFields: [],
         abstract: '',
         fundingGoal: '',
-        coordinatorName: '',
+        currency: '',
+        email: '',
         budgetItems: {},
         timelineItems: []
     });
@@ -29,6 +31,7 @@ function ProjectSubmit() {
         } else {
             console.log('Budget is not empty');
         }
+
         fetch('http://localhost:5000/researcher/submit_project', {
             method: 'PUT',
             headers: {
@@ -36,15 +39,15 @@ function ProjectSubmit() {
             },
             body: JSON.stringify(formData)
         })
-            .then(response => {
-                console.log(response);
-                // console.log('Role:', role);
-                // Handle response from the API
-            })
-            .catch(error => {
-                console.error(error);
-                // Handle error
-            });
+        .then(response => {
+            console.log(response);
+            // console.log('Role:', role);
+            // Handle response from the API
+        })
+        .catch(error => {
+            console.error(error);
+            // Handle error
+        });
 
         setFormData((prevFormData) => ({
             ...prevFormData,
@@ -79,7 +82,13 @@ function ProjectSubmit() {
                 budgetItems: updatedBudgetItems,
             }));
             handleBudgetChange(updatedBudgetItems);
-        } else {
+        } else if (name === "fundingGoal") { // Add this condition
+            const parsedValue = parseInt(value); // Parse the value as an integer
+            setFormData((formData) => ({
+                ...formData,
+                [name]: parsedValue,
+            }));
+        }else {
             setFormData((formData) => ({
                 ...formData,
                 [name]: value,
@@ -116,6 +125,11 @@ function ProjectSubmit() {
                     handleFieldSelectionChange={handleFieldSelectionChange}
                     setFormData={setFormData}>
                 </BasicSection>
+                <FundingGoal
+                    handleInputChange={(event) => handleInputChange(event)} // Wrap handleInputChange inside another function
+                    setFormData={setFormData}
+                >
+                </FundingGoal>
                 <AdditionalResearcherProjectSubmissionComponents
                     handleInputChange={handleInputChange}
                     handleFieldSelectionChange={handleFieldSelectionChange}
