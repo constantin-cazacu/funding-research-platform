@@ -71,6 +71,20 @@ scheduler.add_job(update_up_metric, 'interval', seconds=10)
 scheduler.start()
 
 
+def get_full_name(email):
+    url = 'http://localhost:5001/retrieve_full_name'
+    params = {'email': email}
+    response = requests.get(url, params=params)
+
+    if response.status_code == 200:
+        # Successful request
+        full_name = response.json()['full_name']
+        return full_name
+    else:
+        # Error occurred
+        return "error"
+
+
 # @app.before_request
 @jwt_required()
 def check_auth():
@@ -220,9 +234,11 @@ class ResearcherProjectData(Resource):
 
     def get(self):
         args = self.parser.parse_args()
-        print("id:", args["id"])
         project = ResearcherProject.query.filter_by(id=args['id']).first()
-        print("here:", project)
+        print('project', project)
+        student = get_full_name(project.student_email)
+        print('student', student)
+        supervisor = get_full_name(project.supervisor_email)
         project_data = {
             'id': project.id,
             'title': project.title,
@@ -230,6 +246,10 @@ class ResearcherProjectData(Resource):
             'fields_of_study': project.fields_of_study,
             'budget': project.budget,
             'timeline': project.timeline,
+            'funding_goal': project.funding_goal,
+            'currency': project.currency,
+            'student': student,
+            'supervisor': supervisor,
         }
         return make_response({"data": project_data}, 200)
 
@@ -260,7 +280,7 @@ api.add_resource(BusinessProjectSubmission, "/business/submit_project")
 api.add_resource(PendingProjects, "/pending_projects")
 api.add_resource(EvaluateProjects, "/evaluate_projects")
 api.add_resource(ResearcherProjectData, "/researcher_project_data")
-api.add_resource(ResearcherProjectData, "/business_project_data")
+api.add_resource(BusinessProjectData, "/business_project_data")
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)
