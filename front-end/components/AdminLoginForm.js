@@ -72,7 +72,7 @@ const AdminLoginForm = () => {
         // Handle the API response here
         console.log(data);
         // Redirect to another page after successful login
-        router.push('/admin/admin_panel'); // Replace '/dashboard' with the desired page URL
+        router.push('/admin/panel'); // Replace '/dashboard' with the desired page URL
       })
       .catch((error) => {
         console.error(error);
