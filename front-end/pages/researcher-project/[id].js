@@ -1,11 +1,11 @@
 import { useRouter } from 'next/router';
-import ProjectPage from '../../components/ProjectPage';
+import ResearcherProjectPage from '../../components/ResearcherProjectPage';
 
 const ProjectDetailsPage = () => {
   const router = useRouter();
   const { id } = router.query;
 
-  return <ProjectPage projectId={id} />;
+  return <ResearcherProjectPage projectId={id} />;
 };
 
 export default ProjectDetailsPage;
