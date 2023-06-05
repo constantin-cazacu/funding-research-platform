@@ -36,7 +36,6 @@ const ResearcherProjectPage = ({ projectId }) => {
     title: project_name,
     student,
     supervisor,
-    image_url,
     abstract,
     fields_of_study,
     budget: budget_items, // Rename the property to budget_items
