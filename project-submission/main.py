@@ -85,6 +85,20 @@ def get_full_name(email):
         return "error"
 
 
+def get_company_name(email):
+    url = 'http://localhost:5001/retrieve_company_name'
+    params = {'email': email}
+    response = requests.get(url, params=params)
+
+    if response.status_code == 200:
+        # Successful request
+        company_name = response.json()['company_name']
+        return company_name
+    else:
+        # Error occurred
+        return "error"
+
+
 # @app.before_request
 @jwt_required()
 def check_auth():
@@ -149,15 +163,17 @@ class BusinessProjectSubmission(Resource):
             project_title = data['projectTitle']
             abstract = data['abstract']
             selected_fields = data['selectedFields']
-            budget = data['budget']
+            offered_funds = data['offeredFunds']
             objectives = data['objectives']
+            email = data['email']
             status = 'pending'
 
             project = BusinessProject(title=project_title,
                                       abstract=abstract,
                                       fields_of_study=selected_fields,
-                                      budget=budget,
+                                      offered_funds=offered_funds,
                                       objectives=objectives,
+                                      email=email,
                                       status=status)
 
             db.session.add(project)
@@ -261,16 +277,20 @@ class BusinessProjectData(Resource):
 
     def get(self):
         args = self.parser.parse_args()
-        print("id:", args["id"])
+        # print("id:", args["id"])
         project = BusinessProject.query.filter_by(id=args['id']).first()
-        print("here:", project)
+        owner = get_full_name(project.email)
+        company_name = get_company_name(project.email)
+        # print("here:", project)
         project_data = {
             'id': project.id,
             'title': project.title,
             'abstract': project.abstract,
             'fields_of_study': project.fields_of_study,
-            'budget': project.budget,
+            'offered_funds': project.offered_funds,
             'objectives': project.objectives,
+            'owner': owner,
+            'company_name': company_name,
         }
         return make_response({"data": project_data}, 200)
 
