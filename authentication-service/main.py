@@ -296,7 +296,7 @@ class BusinessRegister(Resource):
         password = generate_password_hash(data['password'])
         role = 'juridical_person'
         company_name = data['company_name']
-        company_idno = data.get('company_idno')
+        company_idno = data['company_idno']
 
         # Create a new User object
         user = User(name=name,
@@ -480,6 +480,31 @@ class RetrieveFullName(Resource):
             return make_response({'error': 'User not found'}, 404)
 
 
+class RetrieveCompanyName(Resource):
+    def __init__(self):
+        self.parser = reqparse.RequestParser()
+        self.parser.add_argument('email', type=str, location='args', default=None)
+
+    def get(self):
+        args = self.parser.parse_args()
+        user = User.query.filter_by(email=args['email']).first()
+        if user:
+            if user.role == 'juridical_person':
+                juridical_person = JuridicalPerson.query.filter_by(user_id=user.id).first()
+                if juridical_person:
+                    company_name = juridical_person.company_name
+                    return make_response({'company_name': company_name}, 200)
+                else:
+                    # JuridicalPerson not found for the user
+                    return make_response({'error': "no company found"}, 404)
+            else:
+                # User is not a juridical person
+                return make_response({'error': "no juridical person found"}, 404)
+        else:
+            # User not found with the given email
+            return make_response({'error': "no user found"}, 404)
+
+
 api.add_resource(ResearcherRegister, "/researcher/register")
 api.add_resource(BusinessRegister, "/business/register")
 api.add_resource(SupporterRegister, "/supporter/register")
@@ -490,6 +515,7 @@ api.add_resource(RefreshAccessToken, "/refresh")
 api.add_resource(CheckAuthorization, "/check_auth")
 api.add_resource(RetrieveRole, "/retrieve_role")
 api.add_resource(RetrieveFullName, "/retrieve_full_name")
+api.add_resource(RetrieveCompanyName, "/retrieve_company_name")
 
 
 if __name__ == '__main__':
