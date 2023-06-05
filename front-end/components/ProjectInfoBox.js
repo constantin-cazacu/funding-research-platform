@@ -2,6 +2,8 @@ import { Box, Button, Chip, Typography } from '@mui/material';
 import FundingProgress from './FundingProgress';
 
 const ProjectInfoBox = ({ collected_funds, funding_goal, fields_of_study }) => {
+    collected_funds = 150 //test
+    funding_goal = 1000 //test
   return (
     <Box>
       <FundingProgress collected_funds={collected_funds} funding_goal={funding_goal} />

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Box, Tab, Tabs, Typography } from '@mui/material';
+import { Box, Tab, Tabs, Typography, Grid } from '@mui/material';
 import { Timeline, TimelineItem, TimelineSeparator, TimelineConnector, TimelineContent, TimelineDot } from '@mui/lab';
 import { VictoryPie } from 'victory';
 
@@ -45,15 +45,21 @@ const ProjectTabs = ({ abstract, budget_items, timeline_items }) => {
               {abstract}
             </Typography>
 
-            <Typography variant="h6" gutterBottom>
-              Budget
-            </Typography>
-            {budget_items.map((item, index) => (
-              <Typography key={index} variant="body1" gutterBottom>
-                {`${item.name}: $${item.sum}`}
-              </Typography>
-            ))}
-            {renderBudgetChart()}
+            <Grid container spacing={2}>
+              <Grid item xs={6}>
+                <Typography variant="h6" gutterBottom>
+                  Budget
+                </Typography>
+                {budget_items.map((item, index) => (
+                  <Typography key={index} variant="body1" gutterBottom>
+                    {`${item.name}: $${item.sum}`}
+                  </Typography>
+                ))}
+              </Grid>
+              <Grid item xs={6}>
+                {renderBudgetChart()}
+              </Grid>
+            </Grid>
 
             <Typography variant="h6" gutterBottom>
               Timeline

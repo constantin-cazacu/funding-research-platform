@@ -8,7 +8,10 @@ const FundingProgress = ({ collected_funds, funding_goal }) => {
       <Typography variant="subtitle1" gutterBottom>
         Funding Progress
       </Typography>
-      <LinearProgress variant="determinate" value={progress} />
+      <LinearProgress
+          variant="determinate"
+          value={progress}
+          color="success" />
       <Box display="flex" justifyContent="space-between">
         <Typography variant="caption">{`Collected Funds: $${collected_funds}`}</Typography>
         <Typography variant="caption">{`Funding Goal: $${funding_goal}`}</Typography>
