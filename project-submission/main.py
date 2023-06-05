@@ -98,7 +98,8 @@ class ResearcherProjectSubmission(Resource):
             abstract = data['abstract']
             funding_goal = data['fundingGoal']
             currency = data['currency']
-            email = data['email']
+            student_email = data['studentEmail']
+            supervisor_email = data['supervisorEmail']
             budget_items = data['budgetItems']
             timeline_items = data['timelineItems']
             status = 'pending'
@@ -108,7 +109,8 @@ class ResearcherProjectSubmission(Resource):
                                         fields_of_study=selected_fields,
                                         funding_goal=funding_goal,
                                         currency=currency,
-                                        email=email,
+                                        student_email=student_email,
+                                        supervisor_email=supervisor_email,
                                         budget=budget_items,
                                         timeline=timeline_items,
                                         status=status)
