@@ -1,6 +1,6 @@
 from apscheduler.schedulers.background import BackgroundScheduler
 from flask import Flask, request, make_response
-from flask_restful import Api, Resource
+from flask_restful import Api, Resource, reqparse
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager, jwt_required, get_jwt_identity, create_access_token, create_refresh_token, get_jwt, verify_jwt_in_request, get_jti, decode_token
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -68,9 +68,9 @@ def create_predefined_admin_users():
                 db.session.commit()
 
 
-# # Create the database tables
-# with app.app_context():
-#     db.create_all()
+# Create the database tables
+with app.app_context():
+    db.create_all()
 
 # Define a Prometheus counter to track the number of new users
 new_user_counter = Counter('new_users', 'Number of new users per week', ['week'])
@@ -389,7 +389,6 @@ class Login(Resource):
         return make_response({'message': 'Login successful'}, 200, headers)
 
 
-
 class AdminLogin(Resource):
     def post(self):
         data = request.get_json()
@@ -466,6 +465,21 @@ class RetrieveRole(Resource):
         return make_response({"role": jwt_token['role']}, 200)
 
 
+class RetrieveFullName(Resource):
+    def __init__(self):
+        self.parser = reqparse.RequestParser()
+        self.parser.add_argument('email', type=str, location='args', default=None)
+
+    def get(self):
+        args = self.parser.parse_args()
+        researcher_user = User.query.filter_by(email=args['email']).first()
+        if researcher_user:
+            full_name = researcher_user.get_full_name()
+            return make_response({'full_name': full_name}, 200)
+        else:
+            return make_response({'error': 'User not found'}, 404)
+
+
 api.add_resource(ResearcherRegister, "/researcher/register")
 api.add_resource(BusinessRegister, "/business/register")
 api.add_resource(SupporterRegister, "/supporter/register")
@@ -475,6 +489,7 @@ api.add_resource(Logout, "/logout")
 api.add_resource(RefreshAccessToken, "/refresh")
 api.add_resource(CheckAuthorization, "/check_auth")
 api.add_resource(RetrieveRole, "/retrieve_role")
+api.add_resource(RetrieveFullName, "/retrieve_full_name")
 
 
 if __name__ == '__main__':
