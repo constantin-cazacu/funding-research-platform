@@ -2,14 +2,19 @@ import { useState } from "react";
 import BasicSection from "../../components/BasicSection";
 import {Box, Button} from "@mui/material";
 import BusinessBasicSectionAdditions from "../../components/BusinessBasicSectionAdditions";
+import OfferedFundingInput from '../../components/OfferedFunds';
+import OwnerMailField from '../../components/OwnerMailField';
+
 
 function ProjectSubmit() {
     const [formData, setFormData] = useState({
         projectTitle: '',
         selectedFields: [],
         abstract: '',
-        budget: '',
-        objectives: ''
+        objectives: [],
+        offeredFunds: '',
+        currency: '',
+        email: '',
     });
 
 
@@ -42,16 +47,39 @@ function ProjectSubmit() {
         const value = target.type === 'checkbox' ? target.checked : target.value;
         const name = target.name;
 
-        console.log(name, value); // add this line to check the values
-
         if (!name) {
             return;
         }
-        setFormData((formData) => ({
-            ...formData,
-            [name]: value,
-        }));
+
+        if (name === 'selectedFields') {
+            setFormData((formData) => ({
+                ...formData,
+                [name]: value,
+            }));
+        } else if (name === 'offeredFunds' || name === 'currency') {
+            setFormData((formData) => ({
+                ...formData,
+                [name]: value,
+            }));
+        } else if (name === 'email') {
+            setFormData((formData) => ({
+                ...formData,
+                email: value,
+            }));
+        } else if (name === 'objectives') {
+            const objectives = value.filter((objective) => objective !== '');
+            setFormData((formData) => ({
+                ...formData,
+                objectives: objectives,
+            }));
+        } else {
+            setFormData((formData) => ({
+                ...formData,
+                [name]: value,
+            }));
+        }
     };
+
 
     return (
         <>
@@ -64,6 +92,11 @@ function ProjectSubmit() {
                     handleInputChange={handleInputChange}
                     setFormData={setFormData}>
                 </BusinessBasicSectionAdditions>
+                <Box sx={{ my: 2 }}>
+                    <OfferedFundingInput handleInputChange={handleInputChange} />
+                </Box>
+                <OwnerMailField
+                    handleInputChange={handleInputChange} />
                 <Box sx={{
                     display: "flex",
                     flexDirection: "column",
