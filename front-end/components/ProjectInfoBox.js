@@ -1,17 +1,17 @@
 import { Box, Button, Chip, Typography } from '@mui/material';
 import FundingProgress from './FundingProgress';
 
-const ProjectInfoBox = ({ collected_funds, funding_goal, fields_of_study }) => {
+const ProjectInfoBox = ({ collected_funds, funding_goal, currency, fields_of_study }) => {
     collected_funds = 150 //test
-    funding_goal = 1000 //test
+    // funding_goal = 1000 //test
   return (
     <Box>
-      <FundingProgress collected_funds={collected_funds} funding_goal={funding_goal} />
+      <FundingProgress collected_funds={collected_funds} funding_goal={funding_goal} currency={currency} />
       <Typography variant="h5" gutterBottom>
-        {`$${collected_funds}`}
+        {`${currency} ${collected_funds}`}
       </Typography>
       <Typography variant="subtitle1" color="textSecondary" gutterBottom>
-        {`Funding Goal: $${funding_goal}`}
+        {`Funding Goal: ${currency} ${funding_goal}`}
       </Typography>
       <Box display="flex" justifyContent="flex-start" marginBottom={1}>
         {fields_of_study.slice(0, 2).map((field, index) => (

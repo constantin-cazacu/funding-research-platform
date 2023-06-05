@@ -3,7 +3,7 @@ import { Box, Tab, Tabs, Typography, Grid } from '@mui/material';
 import { Timeline, TimelineItem, TimelineSeparator, TimelineConnector, TimelineContent, TimelineDot } from '@mui/lab';
 import { VictoryPie } from 'victory';
 
-const ProjectTabs = ({ abstract, budget_items, timeline_items }) => {
+const ProjectTabs = ({ abstract, budget_items, timeline_items, currency }) => {
   const [selectedTab, setSelectedTab] = useState(0);
 
   const handleChange = (event, newValue) => {
@@ -17,7 +17,7 @@ const ProjectTabs = ({ abstract, budget_items, timeline_items }) => {
     }));
 
     return (
-      <Box width={200} height={200}>
+      <Box width={300} height={300}>
         <VictoryPie
           data={data}
           innerRadius={100}
@@ -52,7 +52,7 @@ const ProjectTabs = ({ abstract, budget_items, timeline_items }) => {
                 </Typography>
                 {budget_items.map((item, index) => (
                   <Typography key={index} variant="body1" gutterBottom>
-                    {`${item.name}: $${item.sum}`}
+                    {`${item.name}: ${currency} ${item.sum}`}
                   </Typography>
                 ))}
               </Grid>

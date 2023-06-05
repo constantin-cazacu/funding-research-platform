@@ -1,6 +1,6 @@
 import { Box, LinearProgress, Typography } from '@mui/material';
 
-const FundingProgress = ({ collected_funds, funding_goal }) => {
+const FundingProgress = ({ collected_funds, funding_goal, currency }) => {
   const progress = (collected_funds / funding_goal) * 100;
 
   return (
@@ -13,8 +13,8 @@ const FundingProgress = ({ collected_funds, funding_goal }) => {
           value={progress}
           color="success" />
       <Box display="flex" justifyContent="space-between">
-        <Typography variant="caption">{`Collected Funds: $${collected_funds}`}</Typography>
-        <Typography variant="caption">{`Funding Goal: $${funding_goal}`}</Typography>
+        <Typography variant="caption">{`Collected Funds: ${currency} ${collected_funds}`}</Typography>
+        <Typography variant="caption">{`Funding Goal: ${currency} ${funding_goal}`}</Typography>
       </Box>
     </Box>
   );
