@@ -178,19 +178,19 @@ class PendingProjects(Resource):
         page = args['page']
         pageSize = args['pageSize']
         projects = ResearcherProject.query.filter_by(status='pending').paginate(page=page, per_page=pageSize, error_out=False)
-        print(projects.items)
+        print("project items", projects.items)
+
         project_list = []
         for project in projects.items:
             project_dict = {
                 'id': project.id,
                 'title': project.title,
-                'abstract': project.abstract,
-                'fields_of_study': project.fields_of_study,
-                'budget': project.budget,
-                'timeline': project.timeline,
+                'student_email': project.student_email,
+                'supervisor_email': project.supervisor_email,
                 'status': project.status
             }
             project_list.append(project_dict)
+
         result = {
             'data': project_list,
             'next': projects.next_num if projects.has_next else None
