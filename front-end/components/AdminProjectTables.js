@@ -32,9 +32,8 @@ const ProjectSubmissionEntries = () => {
   const updateProjectStatus = async (projectId, status) => {
     try {
       await axios.post(
-        'http://localhost:5000/evaluate_projects',
-        { status },
-        { params: { id: projectId } }
+          'http://localhost:5000/evaluate_projects',
+          { id: projectId, status: status } // Send an object with both 'id' and 'status'
       );
       console.log(`Project ${projectId} status updated: ${status}`);
     } catch (error) {
@@ -42,18 +41,30 @@ const ProjectSubmissionEntries = () => {
     }
   };
 
+
   const handleSubmit = async () => {
     const updatedProjectIds = [];
+    const requests = [];
+
     for (const projectId in selectedStatus) {
       const status = selectedStatus[projectId];
+
       if (status !== '') {
-        await updateProjectStatus(projectId, status);
         updatedProjectIds.push(projectId);
+        requests.push(updateProjectStatus(projectId, status));
       }
     }
-    setSelectedStatus({});
-    setUpdatedProjects(updatedProjectIds);
+
+    try {
+      await Promise.all(requests);
+      console.log('Projects updated successfully');
+      setSelectedStatus({});
+      setUpdatedProjects(updatedProjectIds);
+    } catch (error) {
+      console.error('Failed to update projects', error);
+    }
   };
+
 
   useEffect(() => {
     const fetchProjects = async () => {
@@ -148,7 +159,7 @@ const ProjectSubmissionEntries = () => {
                         <MenuItem value="">
                           <em>Select status</em>
                         </MenuItem>
-                        <MenuItem value="approved">Approved</MenuItem>
+                        <MenuItem value="accepted">Accepted</MenuItem>
                         <MenuItem value="rejected">Rejected</MenuItem>
                       </Select>
                     </TableCell>

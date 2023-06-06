@@ -196,7 +196,7 @@ class PendingProjects(Resource):
         page = args['page']
         pageSize = args['pageSize']
         projects = ResearcherProject.query.filter_by(status='pending').paginate(page=page, per_page=pageSize, error_out=False)
-        print("project items", projects.items)
+        # print("project items", projects.items)
 
         project_list = []
         for project in projects.items:
@@ -223,26 +223,27 @@ class EvaluateProjects(Resource):
         self.parser.add_argument('id', type=int, location='args', default=None)
 
     def post(self):
-        args = self.parser.parse_args()
-        if args['status'] == "accepted":
-            print(f"Project {args['id']} accepted")
-            project = ResearcherProject.query.filter_by(id=args['id']).first()
+        data = request.get_json()
+        print("data", data)
+        if data['status'] == "accepted":
+            print(f"Project {data['id']} accepted")
+            project = ResearcherProject.query.filter_by(id=data['id']).first()
             project.status = 'accepted'
             db.session.commit()
             # update project status
             # send notification
-            return make_response({"message": f"Project {args['id']} has been accepted"}, 200)
-        elif args['status'] == "rejected":
-            print(f"Project {args['id']} rejected")
-            project = ResearcherProject.query.filter_by(id=args['id']).first()
+            return make_response({"message": f"Project {data['id']} has been accepted"}, 200)
+        elif data['status'] == "rejected":
+            print(f"Project {data['id']} rejected")
+            project = ResearcherProject.query.filter_by(id=data['id']).first()
             project.status = 'rejected'
             db.session.commit()
             # update project status
             # send notification
-            return make_response({"message": f"Project {args['id']} has been rejected"}, 200)
-        elif args['status'] == "pending":
-            print(f"Project {args['id']} unchanged")
-            return make_response({"message": f"Project {args['id']} has been unchanged"}, 200)
+            return make_response({"message": f"Project {data['id']} has been rejected"}, 200)
+        elif data['status'] == "pending":
+            print(f"Project {data['id']} unchanged")
+            return make_response({"message": f"Project {data['id']} has been unchanged"}, 200)
 
 
 class ResearcherProjectData(Resource):
