@@ -4,6 +4,7 @@ import BusinessProjectInfoBox from './BusinessProjectInfoBox';
 import BusinessProjectTabs from './BusinessProjectTabs';
 import { useEffect, useState } from 'react';
 import axios from 'axios';
+import projectImage from '../public/bg-aperiodic-tilings.jpg';
 
 const BusinessProjectPage = ({ projectId }) => {
   const [projectData, setProjectData] = useState(null);
@@ -34,11 +35,12 @@ const BusinessProjectPage = ({ projectId }) => {
   const {
     title: project_name,
     owner,
-    image_url,
+    company_name,
     abstract,
     fields_of_study,
-    budget: budget, // Rename the property to budget_items
-    objectives: objectives, // Rename the property to timeline_items
+    offered_funds: budget,
+    currency,
+    objectives,
   } = projectData;
 
   return (
@@ -50,15 +52,18 @@ const BusinessProjectPage = ({ projectId }) => {
         </Typography>
         <Typography variant="subtitle1" gutterBottom>
           Owner: {owner}
+        </Typography><Typography variant="subtitle1" gutterBottom>
+          Company: {company_name}
         </Typography>
         <Grid container spacing={2} mt={2}>
           <Grid item xs={12} sm={8}>
-            <img src={image_url} alt="Project" style={{ width: '100%', height: 'auto' }} />
+            <img src={projectImage.src} alt="Project" style={{ width: '100%', height: 'auto' }} />
           </Grid>
           <Grid item xs={12} sm={4}>
             <BusinessProjectInfoBox
               budget={budget}
               fields_of_study={fields_of_study}
+              currency = {currency}
             />
           </Grid>
         </Grid>
