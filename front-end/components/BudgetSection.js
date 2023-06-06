@@ -83,7 +83,10 @@ const BudgetSection = ({ handleInputChange, formData, handleBudgetChange  }) => 
                 </Button>
                 {data.length > 0 && (
                     <Box sx={{ mt: 4 }}>
-                        <VictoryPie data={data} />
+                        <VictoryPie
+                            data={data}
+                            innerRadius={100}
+                            colorScale="qualitative"/>
                     </Box>
                 )}
             </Box>

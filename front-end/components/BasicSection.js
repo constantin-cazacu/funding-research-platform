@@ -54,7 +54,7 @@ const BasicSection = ({ handleInputChange, setFormData}) => {
 
     return (
         <Box sx={{ maxWidth: 600, mx: 'auto' }}>
-            <Typography variant="h6" gutterBottom>
+            <Typography variant="h5" gutterBottom>
                 Project Details
             </Typography>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>

@@ -24,8 +24,7 @@ const CoOwnerMailField = ({ handleInputChange }) => {
   return (
     <Box sx={{ maxWidth: 600, mx: 'auto' }}>
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-        <Typography></Typography>
-
+        <Typography variant="h5" gutterBottom sx={{mt:2}}>Contact Info</Typography>
         <TextField
           required
           label="Supervisor Email"

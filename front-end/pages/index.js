@@ -1,4 +1,4 @@
-import Navbar from "../components/navbar";
+import Navbar from "../components/Navbar";
 import CustomCard from "../components/customCard";
 import HorizontalCard from "../components/horizontalCard";
 import RegisterButtons from "../components/RegisterButtons";

@@ -49,6 +49,9 @@ class User(db.Model):
     role = db.Column(db.Enum('admin', 'researcher', 'juridical_person', 'supporter', name='roles'))
     refresh_token = db.Column(db.String(800))
 
+    def get_full_name(self):
+        return f"{self.name} {self.surname}"
+
 
 class Researcher(db.Model):
     __tablename__ = 'researchers'
