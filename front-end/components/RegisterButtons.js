@@ -1,6 +1,5 @@
 import React from "react";
-import Link from "next/link"
-import {Box, Button, Typography} from "@mui/material";
+import {Box, Button, Typography, Link} from "@mui/material";
 
 const RegisterButtons = () => {
     return (
@@ -18,17 +17,17 @@ const RegisterButtons = () => {
                 Choose Your User Type
             </Typography>
             <Button variant="contained" color="primary">
-                <Link href='/researcher/register'>
-                        Researcher
+                <Link href={'/researcher/register'} sx={{textDecoration: 'none', color: 'white'}}>
+                    Researcher
                 </Link>
             </Button>
             <Button variant="contained" color="secondary">
-                <Link href='/business/register'>
+                <Link href={'/business/register'} sx={{textDecoration: 'none', color: 'white'}}>
                         Business
                 </Link>
             </Button>
             <Button variant="contained" color="warning">
-                <Link href='/supporter/register'>
+                <Link href={'/supporter/register'} sx={{textDecoration: 'none', color: 'white'}}>
                     Supporter
                 </Link>
             </Button>
