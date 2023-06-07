@@ -1,21 +1,34 @@
-import Navbar from "../components/Navbar";
-import CustomCard from "../components/customCard";
-import HorizontalCard from "../components/horizontalCard";
-import RegisterButtons from "../components/RegisterButtons";
+import ResearcherProjectCard from '../components/ResearcherProjectCard';
+import BusinessProjectCard from '../components/BusinessProjectCard'
+import projectImage from '../public/bg-aperiodic-tilings.jpg';
+import ResearcherProjectsGrid from "../components/ResearcherProjectsGrid";
+import BusinessProjectsGrid from "../components/BusinessProjectsGrid";
+
 
 function Home() {
     return (
         <>
-            {/*<Navbar></Navbar>,*/}
-            {/*<CustomCard*/}
-            {/*    image="https://lumiere-a.akamaihd.net/v1/images/the-mandalorian-ch-19-mando-download-03_9747c4d3.jpeg"*/}
-            {/*    title="Example CustomCard"*/}
-            {/*    requiredFunds={5000}></CustomCard>*/}
-            {/*<HorizontalCard*/}
-            {/*    image="https://lumiere-a.akamaihd.net/v1/images/the-mandalorian-ch-19-mando-download-03_9747c4d3.jpeg"*/}
-            {/*    title="Example CustomCard"*/}
-            {/*    requiredFunds={5000}></HorizontalCard>*/}
-            <RegisterButtons></RegisterButtons>
+            <ResearcherProjectCard
+                image={projectImage.src}
+                title={'Title1aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaafffffffffffffffffffffffffffffffffffbbbbbbbbbbbbbbbbbbbbbbbbbbbb'}
+                student={'Stduent1'}
+                supervisor={'Superisor1'}
+                collectedFunds={'150'}
+                fundingGoal={'2000'}
+                currency={'USD'}
+                fieldsOfStudy={['Math', 'Engineering']}>
+            </ResearcherProjectCard>
+            <BusinessProjectCard
+                image={projectImage.src}
+                title={'Title1aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaafffffffffffffffffffffffffffffffffffbbbbbbbbbbbbbbbbbbbbbbbbbbbb'}
+                name={'BusuienssUser1'}
+                companyName={'Company1'}
+                projectBudget={'15000'}
+                currency={'USD'}
+                fieldsOfStudy={['Math', 'Engineering']}>
+            </BusinessProjectCard>
+            <ResearcherProjectsGrid></ResearcherProjectsGrid>
+            {/*<BusinessProjectsGrid></BusinessProjectsGrid>*/}
         </>
 
     )
