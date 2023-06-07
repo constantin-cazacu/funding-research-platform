@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import {Box, Button, TextField, Typography} from '@mui/material';
 import { useRouter } from "next/router";
+import { useDispatch } from 'react-redux';
+import { login } from '../slices/authSlice';
 
 const LoginForm = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [token, setToken] = useState('');
-  const [role, setRole] = useState('');
   const [emailError, setEmailError] = useState(false);
   const [submitClicked, setSubmitClicked] = useState(false);
   const [passwordError, setPasswordError] = useState(false);
@@ -16,6 +16,7 @@ const LoginForm = () => {
 
 
   const router = useRouter();
+  const dispatch = useDispatch();
 
   const handleEmailChange = (e) => {
     setEmail(e.target.value);
@@ -61,41 +62,20 @@ const LoginForm = () => {
       // Extract the custom Role header from the response
       const role = response.headers.get('Role');
 
-      // Store the token and role in the component's state
-      setToken(token);
-      setRole(role);
+      // Dispatch the login action with the token and role
+      dispatch(login({ token, role }));
 
       const data = await response.json();
       // Handle the API response here
       console.log('data:', data);
       console.log('Role:', role);
+      await router.push('/');
 
-
-      // Redirect to different pages based on the user type
-      if (role === 'researcher') {
-          await router.push('/researcher/project_submit');
-      } else if (role === 'juridical_person') {
-          console.log("I was here")
-          await router.push('/business/project_submit');
-      } else if (role === 'supporter') {
-          await router.push('/supporter_page');  //!!!Modify here the url
-      } else {
-        // Redirect to a default page if the user type is unknown or not handled
-          await router.push('/');
-      }
     } catch (error) {
       console.error(error);
     }
     })();
   };
-
-  useEffect(() => {
-    // This effect runs when the token state changes
-    if (token) {
-      // Call the magic API here or perform any other actions
-      console.log('Token updated:', token);
-    }
-  }, [token]);
 
   return (
       <form onSubmit={handleSubmit}>
