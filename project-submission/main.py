@@ -184,7 +184,7 @@ class BusinessProjectSubmission(Resource):
             return make_response({'message': 'Project Submitted'}, 201)
 
 
-class PendingProjects(Resource):
+class ResearcherPendingProjects(Resource):
     def __init__(self):
         self.parser = reqparse.RequestParser()
         self.parser.add_argument('page', type=int, location='args', default=1)
@@ -196,19 +196,50 @@ class PendingProjects(Resource):
         page = args['page']
         pageSize = args['pageSize']
         projects = ResearcherProject.query.filter_by(status='pending').paginate(page=page, per_page=pageSize, error_out=False)
-        print(projects.items)
+        # print("project items", projects.items)
+
         project_list = []
         for project in projects.items:
             project_dict = {
                 'id': project.id,
                 'title': project.title,
-                'abstract': project.abstract,
-                'fields_of_study': project.fields_of_study,
-                'budget': project.budget,
-                'timeline': project.timeline,
+                'student_email': project.student_email,
+                'supervisor_email': project.supervisor_email,
                 'status': project.status
             }
             project_list.append(project_dict)
+
+        result = {
+            'data': project_list,
+            'next': projects.next_num if projects.has_next else None
+        }
+        return make_response(result)
+
+
+class BusinessPendingProjects(Resource):
+    def __init__(self):
+        self.parser = reqparse.RequestParser()
+        self.parser.add_argument('page', type=int, location='args', default=1)
+        self.parser.add_argument('pageSize', type=int, location='args', default=5)
+
+    def get(self):
+        args = self.parser.parse_args()
+        print("args: ", args)
+        page = args['page']
+        pageSize = args['pageSize']
+        projects = BusinessProject.query.filter_by(status='pending').paginate(page=page, per_page=pageSize, error_out=False)
+        # print("project items", projects.items)
+
+        project_list = []
+        for project in projects.items:
+            project_dict = {
+                'id': project.id,
+                'title': project.title,
+                'email': project.email,
+                'status': project.status
+            }
+            project_list.append(project_dict)
+
         result = {
             'data': project_list,
             'next': projects.next_num if projects.has_next else None
@@ -219,6 +250,7 @@ class PendingProjects(Resource):
 class EvaluateProjects(Resource):
     def post(self):
         data = request.get_json()
+        print("data", data)
         if data['status'] == "accepted":
             print(f"Project {data['id']} accepted")
             project = ResearcherProject.query.filter_by(id=data['id']).first()
@@ -234,6 +266,32 @@ class EvaluateProjects(Resource):
             db.session.commit()
             # update project status
             # send notification
+            return make_response({"message": f"Project {data['id']} has been rejected"}, 200)
+        elif data['status'] == "pending":
+            print(f"Project {data['id']} unchanged")
+            return make_response({"message": f"Project {data['id']} has been unchanged"}, 200)
+
+
+class EvaluateBusinessProjects(Resource):
+    def __init__(self):
+        self.parser = reqparse.RequestParser()
+        self.parser.add_argument('status', type=str, location='args', default="pending")
+        self.parser.add_argument('id', type=int, location='args', default=None)
+
+    def post(self):
+        data = request.get_json()
+        print("data", data)
+        if data['status'] == "accepted":
+            print(f"Project {data['id']} accepted")
+            project = BusinessProject.query.filter_by(id=data['id']).first()
+            project.status = 'accepted'
+            db.session.commit()
+            return make_response({"message": f"Project {data['id']} has been accepted"}, 200)
+        elif data['status'] == "rejected":
+            print(f"Project {data['id']} rejected")
+            project = BusinessProject.query.filter_by(id=data['id']).first()
+            project.status = 'rejected'
+            db.session.commit()
             return make_response({"message": f"Project {data['id']} has been rejected"}, 200)
         elif data['status'] == "pending":
             print(f"Project {data['id']} unchanged")
@@ -357,8 +415,10 @@ class BusinessProjectCardData(Resource):
 
 api.add_resource(ResearcherProjectSubmission, "/researcher/submit_project")
 api.add_resource(BusinessProjectSubmission, "/business/submit_project")
-api.add_resource(PendingProjects, "/pending_projects")
+api.add_resource(ResearcherPendingProjects, "/researcher_pending_projects")
+api.add_resource(BusinessPendingProjects, "/business_pending_projects")
 api.add_resource(EvaluateProjects, "/evaluate_projects")
+api.add_resource(EvaluateBusinessProjects, "/evaluate_business_projects")
 api.add_resource(ResearcherProjectData, "/researcher_project_data")
 api.add_resource(BusinessProjectData, "/business_project_data")
 api.add_resource(ResearcherProjectCardData, "/researcher_project_card_data")
