@@ -258,6 +258,14 @@ class EvaluateProjects(Resource):
             db.session.commit()
             # update project status
             # send notification
+            data_supervisor = {"title": project.title,
+                               "email": project.supervisor_email,
+                               "status": 'accepted'}
+            data_student = {"title": project.title,
+                            "email": project.student_email,
+                            "status": 'accepted'}
+            response = requests.post('http://localhost:5008/send_evaluation', json=data_supervisor)
+            response = requests.post('http://localhost:5008/send_evaluation', json=data_student)
             return make_response({"message": f"Project {data['id']} has been accepted"}, 200)
         elif data['status'] == "rejected":
             print(f"Project {data['id']} rejected")
@@ -266,6 +274,14 @@ class EvaluateProjects(Resource):
             db.session.commit()
             # update project status
             # send notification
+            data_supervisor = {"title": project.title,
+                               "email": project.supervisor_email,
+                               "status": 'rejected'}
+            data_student = {"title": project.title,
+                            "email": project.student_email,
+                            "status": 'rejected'}
+            response = requests.post('http://localhost:5008/send_evaluation', json=data_supervisor)
+            response = requests.post('http://localhost:5008/send_evaluation', json=data_student)
             return make_response({"message": f"Project {data['id']} has been rejected"}, 200)
         elif data['status'] == "pending":
             print(f"Project {data['id']} unchanged")
@@ -286,12 +302,20 @@ class EvaluateBusinessProjects(Resource):
             project = BusinessProject.query.filter_by(id=data['id']).first()
             project.status = 'accepted'
             db.session.commit()
+            data = {"title": project.title,
+                    "email": project.email,
+                    "status": 'accepted'}
+            response = requests.post('http://localhost:5008/send_evaluation', json=data)
             return make_response({"message": f"Project {data['id']} has been accepted"}, 200)
         elif data['status'] == "rejected":
             print(f"Project {data['id']} rejected")
             project = BusinessProject.query.filter_by(id=data['id']).first()
             project.status = 'rejected'
             db.session.commit()
+            data = {"title": project.title,
+                    "email": project.email,
+                    "status": 'rejected'}
+            response = requests.post('http://localhost:5008/send_evaluation', json=data)
             return make_response({"message": f"Project {data['id']} has been rejected"}, 200)
         elif data['status'] == "pending":
             print(f"Project {data['id']} unchanged")

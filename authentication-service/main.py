@@ -10,7 +10,7 @@ import os
 from datetime import timedelta
 from functools import wraps
 import requests
-from prometheus_client import Counter, make_wsgi_app, Gauge, Histogram
+from prometheus_client import Counter, make_wsgi_app, Gauge, Histogram, generate_latest, CollectorRegistry, REGISTRY, Metric
 from werkzeug.middleware.dispatcher import DispatcherMiddleware
 import time
 # import psutil
@@ -505,6 +505,12 @@ class RetrieveCompanyName(Resource):
             return make_response({'error': "no user found"}, 404)
 
 
+class RetrievePrometheusMetrics(Resource):
+    def get(self):
+        collected_metrics = generate_latest(REGISTRY)
+        return make_response({"message": collected_metrics}, 200)
+
+
 api.add_resource(ResearcherRegister, "/researcher/register")
 api.add_resource(BusinessRegister, "/business/register")
 api.add_resource(SupporterRegister, "/supporter/register")
@@ -516,6 +522,7 @@ api.add_resource(CheckAuthorization, "/check_auth")
 api.add_resource(RetrieveRole, "/retrieve_role")
 api.add_resource(RetrieveFullName, "/retrieve_full_name")
 api.add_resource(RetrieveCompanyName, "/retrieve_company_name")
+api.add_resource(RetrievePrometheusMetrics, "/retrieve_metrics")
 
 
 if __name__ == '__main__':
