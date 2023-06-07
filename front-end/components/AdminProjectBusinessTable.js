@@ -128,7 +128,7 @@ const ProjectSubmissionEntries = () => {
   };
 
   return (
-    <Box height="100vh" display="flex" flexDirection="column" justifyContent="center" alignItems="center">
+    <Box height="80vh" display="flex" flexDirection="column" justifyContent="center" alignItems="center">
       {isLoading ? (
         <CircularProgress />
       ) : (
