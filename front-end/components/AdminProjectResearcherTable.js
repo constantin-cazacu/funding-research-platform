@@ -69,7 +69,7 @@ const ProjectSubmissionEntries = () => {
   useEffect(() => {
     const fetchProjects = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/pending_projects', {
+        const response = await axios.get('http://localhost:5000/researcher_pending_projects', {
           params: {
             page: currentPage,
             pageSize: pageSize,
@@ -92,7 +92,7 @@ const ProjectSubmissionEntries = () => {
   const handleLoadNext = async () => {
     try {
       const nextPageToFetch = currentPage + 1;
-      const response = await axios.get('http://localhost:5000/pending_projects', {
+      const response = await axios.get('http://localhost:5000/researcher_pending_projects', {
         params: {
           page: nextPageToFetch,
           pageSize: pageSize,
@@ -111,7 +111,7 @@ const ProjectSubmissionEntries = () => {
   const handleLoadPrevious = async () => {
     try {
       const previousPageToFetch = currentPage - 1;
-      const response = await axios.get('http://localhost:5000/pending_projects', {
+      const response = await axios.get('http://localhost:5000/researcher_pending_projects', {
         params: {
           page: previousPageToFetch,
           pageSize: pageSize,
