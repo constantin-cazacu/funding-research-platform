@@ -5,6 +5,10 @@ from dotenv import load_dotenv
 import os
 from flask_cors import CORS
 from flask_mail import Mail, Message
+from werkzeug.middleware.dispatcher import DispatcherMiddleware
+from prometheus_flask_exporter import PrometheusMetrics
+from prometheus_client import Counter, make_wsgi_app, Gauge
+from apscheduler.schedulers.background import BackgroundScheduler
 
 
 load_dotenv()
@@ -22,6 +26,19 @@ api = Api(app)
 mail = Mail(app)
 CORS(app, origins=['http://localhost:3001'])
 
+# Add prometheus wsgi middleware to route /metrics requests
+app.wsgi_app = DispatcherMiddleware(app.wsgi_app, {
+    '/metrics': make_wsgi_app()
+})
+
+
+# up_metric = Gauge('up', '1 if the target is up, 0 if it is down')
+
+
+# def update_up_metric():
+#     # check the status of the application here
+#     status = 1  # set to 1 if the application is up, 0 if it is down
+#     up_metric.set(status)
 
 @app.route('/send_email', methods=['OPTIONS'])
 def handle_options():
@@ -39,6 +56,9 @@ def send_email(to, subject, body):
 
 
 class SendEmail(Resource):
+    # scheduler = BackgroundScheduler()
+    # scheduler.add_job(update_up_metric, 'interval', seconds=10)
+
     def get(self):
         send_email(os.environ.get('EMAIL_RECEIVER'), 'Test Email', 'This is a test email.')
         return make_response({"message": "Email sent!"}, 200)
