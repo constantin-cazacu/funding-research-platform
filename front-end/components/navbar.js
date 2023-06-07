@@ -19,12 +19,23 @@ const Navbar = () => {
     router.push('/login');
   };
 
+  const handleRegisterClick = () => {
+    router.push('/register');
+  };
+
   const handleSubmitProjectClick = () => {
     router.push('/submit-project');
   };
 
   return (
-    <Box display="flex" justifyContent="space-between" alignItems="center" padding={2}>
+    <Box
+      display="flex"
+      justifyContent="space-between"
+      alignItems="center"
+      padding={2}
+      maxWidth={1300}
+      margin="0 auto"
+    >
       <Box>
         {loggedIn && (role === 'researcher' || role === 'juridical_person') && (
           <Button variant="contained" onClick={handleSubmitProjectClick}>
@@ -32,14 +43,19 @@ const Navbar = () => {
           </Button>
         )}
       </Box>
-      <Box>
-        {loggedIn ? (
+      <Box sx={{ display: 'flex', gap: '10px' }}>
+        {!loggedIn ? (
+          <>
+            <Button variant="contained" onClick={handleLoginClick}>
+              Login
+            </Button>
+            <Button variant="contained" onClick={handleRegisterClick}>
+              Register
+            </Button>
+          </>
+        ) : (
           <Button variant="contained" onClick={handleLogoutClick}>
             Logout
-          </Button>
-        ) : (
-          <Button variant="contained" onClick={handleLoginClick}>
-            Login
           </Button>
         )}
       </Box>
