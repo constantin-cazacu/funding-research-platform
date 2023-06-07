@@ -3,11 +3,11 @@ import { Grid, Box, CircularProgress, Button, Typography } from '@mui/material';
 import { useDispatch, useSelector } from 'react-redux';
 import axios from 'axios';
 import {
-  setProjects as setBusinessProjects,
-  setCurrentPage as setBusinessCurrentPage,
-  setTotalPages as setBusinessTotalPages,
-  setHasNextPage as setBusinessHasNextPage,
-  setIsLoading as setBusinessIsLoading,
+  setBusinessProjects,
+  setBusinessCurrentPage,
+  setBusinessTotalPages,
+  setBusinessHasNextPage,
+  setBusinessIsLoading,
 } from '../slices/businessProjectsSlice';
 import BusinessProjectCard from "./BusinessProjectCard";
 import projectImage from '../public/bg-aperiodic-tilings.jpg';
@@ -76,46 +76,46 @@ const BusinessProjectsGrid = () => {
   );
 
   return (
-    <Box sx={{ display: 'flex', justifyContent: 'center', position: 'relative' }}>
-      <>
-        <Typography variant="h4" align="center" gutterBottom>
-          Projects looking for researchers
-        </Typography>
-        <Grid container spacing={2}>
-          {projects.map((project) => (
-            <Grid item xs={12} sm={6} md={4} key={project.id}>
-              <BusinessProjectCard
-                id={project.id}
-                image={projectImage.src}
-                title={project.title}
-                name={project.name}
-                companyName={project.companyName}
-                projectBudget={project.projectBudget}
-                currency={project.currency}
-                fieldsOfStudy={project.fieldsOfStudy}
-              />
-            </Grid>
-          ))}
-        </Grid>
-        {isLoading && (
-          <Box
-            sx={{
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              width: '100%',
-              height: '100%',
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center',
-              background: 'rgba(0, 0, 0, 0.5)',
-            }}
-          >
-            <CircularProgress />
-          </Box>
-        )}
-        {renderLoadMoreButton()}
-      </>
+    <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'column' }}>
+      <Typography variant="h4" align="center" gutterBottom>
+        Projects Looking for Researchers
+      </Typography>
+      <Box sx={{ position: 'relative' }}>
+      <Grid container spacing={2}>
+        {projects.map((project) => (
+          <Grid item xs={12} sm={6} md={4} key={project.id}>
+            <BusinessProjectCard
+              id={project.id}
+              image={projectImage.src}
+              title={project.title}
+              name={project.name}
+              companyName={project.companyName}
+              projectBudget={project.projectBudget}
+              currency={project.currency}
+              fieldsOfStudy={project.fieldsOfStudy}
+            />
+          </Grid>
+        ))}
+      </Grid>
+      {isLoading && (
+        <Box
+          sx={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            background: 'rgba(0, 0, 0, 0.5)',
+          }}
+        >
+          <CircularProgress />
+        </Box>
+      )}
+      </Box>
+      {renderLoadMoreButton()}
     </Box>
   );
 };

@@ -29,11 +29,11 @@ const businessProjectsSlice = createSlice({
 });
 
 export const {
-  setProjects,
-  setCurrentPage,
-  setTotalPages,
-  setHasNextPage,
-  setIsLoading,
+  setProjects: setBusinessProjects,
+  setCurrentPage: setBusinessCurrentPage,
+  setTotalPages: setBusinessTotalPages,
+  setHasNextPage: setBusinessHasNextPage,
+  setIsLoading: setBusinessIsLoading,
 } = businessProjectsSlice.actions;
 
 export default businessProjectsSlice.reducer;

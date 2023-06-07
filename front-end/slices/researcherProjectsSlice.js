@@ -29,11 +29,11 @@ const researcherProjectsSlice = createSlice({
 });
 
 export const {
-  setProjects,
-  setCurrentPage,
-  setTotalPages,
-  setHasNextPage,
-  setIsLoading,
+  setProjects: setResearcherProjects,
+  setCurrentPage: setResearcherCurrentPage,
+  setTotalPages: setResearcherTotalPages,
+  setHasNextPage: setResearcherHasNextPage,
+  setIsLoading: setResearcherIsLoading,
 } = researcherProjectsSlice.actions;
 
 export default researcherProjectsSlice.reducer;

@@ -28,7 +28,7 @@ function Home() {
                 fieldsOfStudy={['Math', 'Engineering']}>
             </BusinessProjectCard>
             <ResearcherProjectsGrid></ResearcherProjectsGrid>
-            {/*<BusinessProjectsGrid></BusinessProjectsGrid>*/}
+            <BusinessProjectsGrid></BusinessProjectsGrid>
         </>
 
     )

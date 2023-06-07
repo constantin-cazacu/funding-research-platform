@@ -1,13 +1,13 @@
 import React, { useEffect } from 'react';
-import { Grid, Box, CircularProgress, Button } from '@mui/material';
+import { Grid, Box, CircularProgress, Button, Typography } from '@mui/material';
 import { useDispatch, useSelector } from 'react-redux';
 import axios from 'axios';
 import {
-  setProjects,
-  setCurrentPage,
-  setTotalPages,
-  setHasNextPage,
-  setIsLoading,
+  setResearcherProjects,
+  setResearcherCurrentPage,
+  setResearcherTotalPages,
+  setResearcherHasNextPage,
+  setResearcherIsLoading,
 } from '../slices/researcherProjectsSlice';
 import ResearcherProjectCard from "./ResearcherProjectCard";
 import projectImage from '../public/bg-aperiodic-tilings.jpg';
@@ -27,7 +27,7 @@ const ResearcherProjectsGrid = () => {
 
   const fetchProjects = async () => {
     try {
-      dispatch(setIsLoading(true));
+      dispatch(setResearcherIsLoading(true));
       const response = await axios.get('http://localhost:5000/researcher_project_card_data', {
         params: {
           page: currentPage,
@@ -47,19 +47,19 @@ const ResearcherProjectsGrid = () => {
         payloadData = prevProjects.concat(data);
       }
 
-      dispatch(setProjects(payloadData));
-      dispatch(setTotalPages(totalPages));
-      dispatch(setHasNextPage(response.data.next !== null));
+      dispatch(setResearcherProjects(payloadData));
+      dispatch(setResearcherTotalPages(totalPages));
+      dispatch(setResearcherHasNextPage(response.data.next !== null));
     } catch (error) {
       console.error('Error fetching projects:', error);
     } finally {
-      dispatch(setIsLoading(false));
+      dispatch(setResearcherIsLoading(false));
     }
   };
 
   const handleLoadMore = async () => {
     if (hasNextPage) {
-      dispatch(setCurrentPage(currentPage + 1));
+      dispatch(setResearcherCurrentPage(currentPage + 1));
     }
   };
 
@@ -76,22 +76,25 @@ const ResearcherProjectsGrid = () => {
   );
 
   return (
-    <Box sx={{ display: 'flex', justifyContent: 'center', position: 'relative' }}>
-      <div>
-        <Grid container spacing={2}>
+    <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'column' }}>
+      <Typography variant="h4" component="h1" gutterBottom>
+        Projects Looking for Funding
+      </Typography>
+      <Box sx={{ position: 'relative', width: '100%', maxWidth: '1300px' }}>
+        <Grid container spacing={2} rowSpacing={3}>
           {projects.map((project) => (
             <Grid item xs={12} sm={6} md={4} key={project.id}>
-                <ResearcherProjectCard
-                  id={project.id}
-                  image={projectImage}
-                  title={project.title}
-                  student={project.student}
-                  supervisor={project.supervisor}
-                  collectedFunds={project.collectedFunds}
-                  currency={project.currency}
-                  fundingGoal={project.fundingGoal}
-                  fieldsOfStudy={project.fieldsOfStudy}
-                />
+              <ResearcherProjectCard
+                id={project.id}
+                image={projectImage.src}
+                title={project.title}
+                student={project.student}
+                supervisor={project.supervisor}
+                collectedFunds={project.collectedFunds}
+                currency={project.currency}
+                fundingGoal={project.fundingGoal}
+                fieldsOfStudy={project.fieldsOfStudy}
+              />
             </Grid>
           ))}
         </Grid>
@@ -112,8 +115,8 @@ const ResearcherProjectsGrid = () => {
             <CircularProgress />
           </Box>
         )}
-        {renderLoadMoreButton()}
-      </div>
+      </Box>
+      {renderLoadMoreButton()}
     </Box>
   );
 };
