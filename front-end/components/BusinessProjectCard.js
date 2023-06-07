@@ -1,5 +1,5 @@
 import React from 'react';
-import {Card, CardContent, Typography, CardMedia, Chip, Box} from '@mui/material';
+import {Card, CardContent, Typography, CardMedia, Chip, Box, Link} from '@mui/material';
 
 const BusinessProjectCard = ({id, image, title, name, companyName, projectBudget, currency, fieldsOfStudy}) => {
     return (
@@ -10,9 +10,9 @@ const BusinessProjectCard = ({id, image, title, name, companyName, projectBudget
                 image={image}
                 alt="Project Image"/>
             <CardContent>
-                <Typography variant="h6" noWrap>
+                <Link href={`/business-project/${id}`} variant="h6" noWrap sx={{textDecoration: 'none', color: 'black' }}>
                     {title}
-                </Typography>
+                </Link>
                 <Typography variant="body2" color="text.secondary">
                     {name} / {companyName}
                 </Typography>

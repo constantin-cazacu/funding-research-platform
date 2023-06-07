@@ -80,40 +80,40 @@ const BusinessProjectsGrid = () => {
       <Typography variant="h4" align="center" gutterBottom>
         Projects Looking for Researchers
       </Typography>
-      <Box sx={{ position: 'relative' }}>
-      <Grid container spacing={2}>
-        {projects.map((project) => (
-          <Grid item xs={12} sm={6} md={4} key={project.id}>
-            <BusinessProjectCard
-              id={project.id}
-              image={projectImage.src}
-              title={project.title}
-              name={project.name}
-              companyName={project.companyName}
-              projectBudget={project.projectBudget}
-              currency={project.currency}
-              fieldsOfStudy={project.fieldsOfStudy}
-            />
-          </Grid>
-        ))}
-      </Grid>
-      {isLoading && (
-        <Box
-          sx={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            width: '100%',
-            height: '100%',
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            background: 'rgba(0, 0, 0, 0.5)',
-          }}
-        >
-          <CircularProgress />
-        </Box>
-      )}
+      <Box sx={{ position: 'relative', width: '100%', maxWidth: '1300px' }}>
+        <Grid container spacing={2} rowSpacing={3}>
+          {projects.map((project) => (
+            <Grid item xs={12} sm={6} md={4} key={project.id}>
+              <BusinessProjectCard
+                id={project.id}
+                image={projectImage.src}
+                title={project.title}
+                name={project.name}
+                companyName={project.companyName}
+                projectBudget={project.projectBudget}
+                currency={project.currency}
+                fieldsOfStudy={project.fieldsOfStudy}
+              />
+            </Grid>
+          ))}
+        </Grid>
+        {isLoading && (
+          <Box
+            sx={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '100%',
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              background: 'rgba(0, 0, 0, 0.5)',
+            }}
+          >
+            <CircularProgress />
+          </Box>
+        )}
       </Box>
       {renderLoadMoreButton()}
     </Box>
