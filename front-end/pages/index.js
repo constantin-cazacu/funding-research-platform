@@ -3,30 +3,13 @@ import BusinessProjectCard from '../components/BusinessProjectCard'
 import projectImage from '../public/bg-aperiodic-tilings.jpg';
 import ResearcherProjectsGrid from "../components/ResearcherProjectsGrid";
 import BusinessProjectsGrid from "../components/BusinessProjectsGrid";
+import Navbar from "../components/Navbar";
 
 
 function Home() {
     return (
         <>
-            <ResearcherProjectCard
-                image={projectImage.src}
-                title={'Title1aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaafffffffffffffffffffffffffffffffffffbbbbbbbbbbbbbbbbbbbbbbbbbbbb'}
-                student={'Stduent1'}
-                supervisor={'Superisor1'}
-                collectedFunds={'150'}
-                fundingGoal={'2000'}
-                currency={'USD'}
-                fieldsOfStudy={['Math', 'Engineering']}>
-            </ResearcherProjectCard>
-            <BusinessProjectCard
-                image={projectImage.src}
-                title={'Title1aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaafffffffffffffffffffffffffffffffffffbbbbbbbbbbbbbbbbbbbbbbbbbbbb'}
-                name={'BusuienssUser1'}
-                companyName={'Company1'}
-                projectBudget={'15000'}
-                currency={'USD'}
-                fieldsOfStudy={['Math', 'Engineering']}>
-            </BusinessProjectCard>
+            <Navbar></Navbar>
             <ResearcherProjectsGrid></ResearcherProjectsGrid>
             <BusinessProjectsGrid></BusinessProjectsGrid>
         </>
