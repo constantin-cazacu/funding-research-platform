@@ -248,11 +248,6 @@ class BusinessPendingProjects(Resource):
 
 
 class EvaluateProjects(Resource):
-    def __init__(self):
-        self.parser = reqparse.RequestParser()
-        self.parser.add_argument('status', type=str, location='args', default="pending")
-        self.parser.add_argument('id', type=int, location='args', default=None)
-
     def post(self):
         data = request.get_json()
         print("data", data)
@@ -356,6 +351,68 @@ class BusinessProjectData(Resource):
         return make_response({"data": project_data}, 200)
 
 
+class ResearcherProjectCardData(Resource):
+    def __init__(self):
+        self.parser = reqparse.RequestParser()
+        self.parser.add_argument('page', type=int, location='args', default=1)
+        self.parser.add_argument('pageSize', type=int, location='args', default=6)
+
+    def get(self):
+        args = self.parser.parse_args()
+        page = args['page']
+        pageSize = args['pageSize']
+        projects = ResearcherProject.query.filter_by(status='accepted').paginate(page=page, per_page=pageSize, error_out=False)
+        # print(projects.items)
+        project_list = []
+        for project in projects.items:
+            project_dict = {
+                'id': project.id,
+                'title': project.title,
+                'fieldsOfStudy': project.fields_of_study,
+                'student': get_full_name(project.student_email),
+                'supervisor': get_full_name(project.supervisor_email),
+                'fundingGoal': project.funding_goal,
+                'currency': project.currency,
+            }
+            project_list.append(project_dict)
+        result = {
+            'data': project_list,
+            'next': projects.next_num if projects.has_next else None
+        }
+        return make_response(result)
+
+
+class BusinessProjectCardData(Resource):
+    def __init__(self):
+        self.parser = reqparse.RequestParser()
+        self.parser.add_argument('page', type=int, location='args', default=1)
+        self.parser.add_argument('pageSize', type=int, location='args', default=6)
+
+    def get(self):
+        args = self.parser.parse_args()
+        page = args['page']
+        pageSize = args['pageSize']
+        projects = BusinessProject.query.filter_by(status='accepted').paginate(page=page, per_page=pageSize, error_out=False)
+        # print(projects.items)
+        project_list = []
+        for project in projects.items:
+            project_dict = {
+                'id': project.id,
+                'title': project.title,
+                'fieldsOfStudy': project.fields_of_study,
+                'name': get_full_name(project.email),
+                'companyName': get_company_name(project.email),
+                'projectBudget': project.offered_funds,
+                'currency': project.currency,
+            }
+            project_list.append(project_dict)
+        result = {
+            'data': project_list,
+            'next': projects.next_num if projects.has_next else None
+        }
+        return make_response(result)
+
+
 api.add_resource(ResearcherProjectSubmission, "/researcher/submit_project")
 api.add_resource(BusinessProjectSubmission, "/business/submit_project")
 api.add_resource(ResearcherPendingProjects, "/researcher_pending_projects")
@@ -364,6 +421,8 @@ api.add_resource(EvaluateProjects, "/evaluate_projects")
 api.add_resource(EvaluateBusinessProjects, "/evaluate_business_projects")
 api.add_resource(ResearcherProjectData, "/researcher_project_data")
 api.add_resource(BusinessProjectData, "/business_project_data")
+api.add_resource(ResearcherProjectCardData, "/researcher_project_card_data")
+api.add_resource(BusinessProjectCardData, "/business_project_card_data")
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)
