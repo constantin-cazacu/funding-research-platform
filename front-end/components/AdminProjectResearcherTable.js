@@ -12,6 +12,8 @@ import {
   Typography,
   Select,
   MenuItem,
+  InputLabel,
+  Link
 } from '@mui/material';
 import axios from 'axios';
 
@@ -148,7 +150,11 @@ const ProjectSubmissionEntries = () => {
                 {projects.map((project) => (
                   <TableRow key={project.id}>
                     <TableCell>{project.id}</TableCell>
-                    <TableCell>{project.title}</TableCell>
+                    <TableCell>
+                      <Link href={`/researcher-project/${project.id}`} sx={{textDecoration: 'none', color: 'black' }}>
+                        {project.title}
+                      </Link>
+                    </TableCell>
                     <TableCell>{project.student_email}</TableCell>
                     <TableCell>{project.supervisor_email}</TableCell>
                     <TableCell>
