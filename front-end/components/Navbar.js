@@ -24,7 +24,13 @@ const Navbar = () => {
   };
 
   const handleSubmitProjectClick = () => {
-    router.push('/submit-project');
+    if (role === 'researcher') {
+      router.push('/researcher/project_submit');
+    } else if (role === 'juridical_person') {
+      router.push('/business/project_submit');
+    } else {
+      router.push('/401'); // or any other appropriate unauthorized page
+    }
   };
 
   return (
