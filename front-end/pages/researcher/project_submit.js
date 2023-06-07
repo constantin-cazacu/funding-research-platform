@@ -1,5 +1,7 @@
 // ProjectSubmit component
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useSelector } from 'react-redux';
+import { useRouter } from 'next/router';
 import BasicSection from '../../components/BasicSection';
 import BudgetSection from '../../components/BudgetSection';
 import TimelineSection from '../../components/TimelineSection';
@@ -8,6 +10,7 @@ import CoOwnerMailField from '../../components/CoOwnerMailField';
 import FundingGoalInput from '../../components/FundingGoal';
 
 function ProjectSubmit() {
+  const router = useRouter();
   const [formData, setFormData] = useState({
     projectTitle: '',
     selectedFields: [],
@@ -19,11 +22,27 @@ function ProjectSubmit() {
     budgetItems: {},
     timelineItems: [],
   });
+  const loggedIn = useSelector((state) => state.auth.loggedIn);
+  const role = useSelector((state) => state.auth.role);
+  const token = useSelector((state) => state.auth.token);
+
+  useEffect(() => {
+    if (!loggedIn || role !== 'researcher') {
+      router.push('/401'); // Navigate to 401 page if not logged in or not a researcher
+    }
+  }, [loggedIn, role, router]);
 
   const handleSubmit = (event) => {
     event.preventDefault();
+
+    if (!loggedIn || role !== 'researcher') {
+      router.push('/401'); // Navigate to 401 page if not logged in or not a researcher
+      return;
+    }
+
     // Send the form data to the backend
     console.log('Project data submitted:', formData); // just for testing purposes
+
     // Check if budget is empty
     if (Object.keys(formData.budgetItems).length === 0) {
       console.log('Budget is empty');
@@ -35,12 +54,12 @@ function ProjectSubmit() {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`, // Include the token in the request header
       },
       body: JSON.stringify(formData),
     })
       .then((response) => {
         console.log(response);
-        // console.log('Role:', role);
         // Handle response from the API
       })
       .catch((error) => {
